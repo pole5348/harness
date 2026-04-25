@@ -15,16 +15,21 @@
 
 ---
 
-## 페르소나 선택
+## 슬래시 커맨드 목록
 
-사용자가 아래 키워드로 페르소나를 활성화한다.
+슬래시 커맨드(`/네임스페이스:단계`)로 페르소나와 단계를 직접 호출한다.
+커맨드 실행 시 `UserPromptSubmit` 훅이 자동으로 모델을 전환한다 — 수동 `/model` 불필요.
 
-| 활성화 키워드 | 페르소나 | 설명 |
-|---|---|---|
-| `[보안엔지니어]` 또는 `[SE]` | 보안 엔지니어 | 프로젝트 계획→비판→실행→검토→문서화 워크플로 |
-| `[학부생]` 또는 `[STU]` | 학부생 | 교수-학생 Q&A 및 학습 문서화 |
-
-페르소나 키워드 없이 대화 시작 시 → **어느 페르소나로 진행할지 먼저 확인한다.**
+| 커맨드 | 페르소나 | 단계 | 자동 전환 모델 |
+|---|---|---|---|
+| `/se:plan` | 보안 엔지니어 | 계획 수립 | claude-opus-4-7 |
+| `/se:critique` | 보안 엔지니어 | 계획 비판 | claude-opus-4-7 |
+| `/se:confirm` | 보안 엔지니어 | 계획 확정 저장 | claude-sonnet-4-6 |
+| `/se:execute` | 보안 엔지니어 | 실행 | claude-sonnet-4-6 |
+| `/se:review` | 보안 엔지니어 | 종합 검토 | claude-sonnet-4-6 |
+| `/se:doc` | 보안 엔지니어 | 문서화 | claude-haiku-4-5-20251001 |
+| `/teacher:ask` | 학부생 | 질문 | claude-sonnet-4-6 |
+| `/teacher:doc` | 학부생 | 학습 문서화 | claude-sonnet-4-6 |
 
 ---
 
@@ -47,9 +52,9 @@
 | 5. 문서화 (document) | `_harness/security_engineer/05_document.md` | claude-haiku-4-5 또는 claude-sonnet-4-6 | 정형화된 문서 생성 |
 
 ### 계획-비판 루프 규칙
-- `[계획]`과 `[비판]`은 최종 계획 확정 전까지 반복될 수 있다.
+- `/se:plan` → `/se:critique` 는 최종 계획 확정 전까지 반복될 수 있다.
 - 비판 이력은 `_harness/history.md`에만 누적 기록한다.
-- **최종 확정된 계획만** `_harness/security_engineer/plan.md`에 저장한다.
+- **최종 확정된 계획만** `/se:confirm` 으로 `_harness/security_engineer/plan.md`에 저장한다.
 - 최종 plan.md에는 감수해야 할 리스크도 반드시 명시한다.
 
 ---
@@ -65,7 +70,7 @@
 | 1. 질문 (ask) | `_harness/student/01_ask.md` | claude-sonnet-4-6 또는 claude-haiku-4-5 | 개념 설명, 도표 활용 |
 | 2. 문서화 (document) | `_harness/student/02_document.md` | claude-sonnet-4-6 또는 claude-haiku-4-5 | 학습 내용 정리 문서 |
 
-> 보안 엔지니어 작업 중 갑자기 질문할 경우, `[학부생]` 태그로 컨텍스트를 전환한다.
+> 보안 엔지니어 작업 중 갑자기 질문할 경우, `/teacher:ask` 로 즉시 교수 모드로 전환한다.
 
 ---
 

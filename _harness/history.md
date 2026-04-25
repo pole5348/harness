@@ -15,6 +15,37 @@
 
 ---
 
+## 2026-04-25 — 슬래시 커맨드 네임스페이스 전환 + 모델 자동 전환 훅 구현
+
+- **진행 사항**:
+  - 커맨드 형식을 `/se:plan`, `/teacher:ask` 네임스페이스 방식으로 변경
+  - `~/.claude/commands/se/`, `~/.claude/commands/teacher/` 서브디렉토리 구조로 재구성
+  - `UserPromptSubmit` 훅(`hooks/model_switch.py`) 구현 — 커맨드 감지 시 `settings.json` 모델 자동 전환
+  - 커맨드 소스를 하네스 레포에 두고 `~/.claude/commands/`에 심볼릭 링크 연결
+  - `hooks/model_switch.py` 도 하네스 레포에서 관리, `~/.claude/hooks/`에 심볼릭 링크
+- **모델 매핑**:
+  - `/se:plan`, `/se:critique` → `claude-opus-4-7`
+  - `/se:confirm`, `/se:execute`, `/se:review`, `/teacher:*` → `claude-sonnet-4-6`
+  - `/se:doc` → `claude-haiku-4-5-20251001`
+- **이슈**: `model` 프론트매터가 커맨드 파일에서 동작 여부 불확실 → 훅으로 강제 전환 추가
+- **미결 사항**: Confluence, 티스토리, 디자인 MCP 연결 필요
+
+---
+
+## 2026-04-25 — 태그 방식 → 슬래시 커맨드 방식으로 전환
+
+- **진행 사항**:
+  - `[SE]`, `[학부생]` 태그 기반 활성화 방식을 슬래시 커맨드로 전환
+  - `~/.claude/commands/` 에 8개 글로벌 커맨드 생성
+    - 보안엔지니어: `/se-plan`, `/se-critique`, `/confirm-plan`, `/se-execute`, `/se-review`, `/se-doc`
+    - 학부생: `/stu-ask`, `/stu-doc`
+  - CLAUDE.md, README.md 반영 완료
+- **이슈**: 태그 방식은 타이핑이 번거롭고 오타 가능성 있음
+- **조치**: 슬래시 커맨드로 자동완성 지원 및 인자 전달 구조화
+- **미결 사항**: 각 커맨드 실행 전 모델 전환(`/model`)은 여전히 수동
+
+---
+
 ## 2026-04-25 — 하네스 환경 초기 세팅
 
 - **진행 사항**: 
