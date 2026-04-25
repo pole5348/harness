@@ -119,3 +119,41 @@ ls -la ~/.claude/CLAUDE.md
 | `_harness/permissions.md` | 새 단계 시작 전, MCP/권한 확인 |
 | `_harness/security_engineer/execute_library.md` | 실행 단계 전 필요 도구 확인 |
 | `_harness/security_engineer/plan.md` | 최종 확정 계획 (실행 단계 기준) |
+
+---
+
+## Obsidian (Claudian) 설정
+
+이 레포 자체가 Obsidian 볼트입니다.
+
+### 역할 분담
+
+| 환경 | 주요 용도 |
+|---|---|
+| Claude Code CLI / VSCode | `/se:plan` → `/se:review` 실행 워크플로 |
+| Obsidian + Claudian | `/teacher:ask` 학습 노트, `/se:doc` 문서 마무리, `_harness/` 파일 열람 |
+
+### 최초 설정 (한 번만)
+
+```bash
+# 1. Obsidian에서 이 경로를 볼트로 열기
+open -a Obsidian /Users/pole/scripts/harness/harness
+
+# 2. Obsidian → 설정 → 커뮤니티 플러그인 → "Claudian" 검색 후 설치·활성화
+
+# 3. 심볼릭 링크 확인 (이미 완료)
+ls -la .claude/
+# CLAUDE.md -> ../CLAUDE.md  ← Claudian이 이 파일을 로드
+# commands -> ../commands     ← 슬래시 커맨드 볼트 레벨 등록
+```
+
+### Claudian에서 @멘션 활용
+
+```
+/se:critique @_harness/security_engineer/plan.md   ← plan.md 컨텍스트로 비판
+/teacher:ask JWT 토큰이 뭐야? @_harness/history.md  ← 이전 이력 참고하여 질문
+```
+
+### .claudian/ 디렉토리
+
+Claudian이 세션 메타데이터를 저장하는 곳. Git에서 세션 파일은 제외됨 (`.claudian/.gitignore` 적용).

@@ -78,3 +78,31 @@
 
 단계별 MCP, Skills, 권한 목록: `_harness/permissions.md`
 실행 단계 라이브러리 상세: `_harness/security_engineer/execute_library.md`
+
+---
+
+## Obsidian (Claudian) 환경
+
+이 볼트는 하네스 레포와 동일하다 (`/Users/pole/scripts/harness/harness`).
+Claudian 채팅창에서 아래 규칙을 추가로 따른다.
+
+### Claudian 전용 사용 지침
+
+1. **슬래시 커맨드**: 위 커맨드 목록 그대로 사용 (`/se:plan`, `/teacher:ask` 등).
+2. **@멘션 파일 참조**: 커맨드 실행 전 관련 파일을 `@멘션`으로 컨텍스트에 추가할 수 있다.
+   - 계획 비판 시: `@_harness/security_engineer/plan.md`
+   - 이력 확인 시: `@_harness/history.md`
+   - 검토 시: `@_harness/security_engineer/review_report.md`
+3. **Plan 모드**: Claudian의 Plan 모드는 `/se:plan` 단계와 동일하게 취급한다.
+4. **학습 노트 저장**: `/teacher:doc` 산출물은 `_harness/student/docs/`에 저장된다. Obsidian에서 바로 열람·편집 가능.
+5. **인라인 편집**: `_harness/` 에이전트 파일을 Obsidian에서 직접 편집할 수 있다.
+
+### 볼트 내 주요 노트 경로
+
+| 경로 | 용도 |
+|---|---|
+| `_harness/history.md` | 전체 프로젝트 이력 |
+| `_harness/security_engineer/plan.md` | 현재 프로젝트 최종 계획 |
+| `_harness/security_engineer/review_report.md` | 최신 검토 리포트 |
+| `_harness/student/docs/` | 학습 노트 모음 |
+| `_harness/security_engineer/docs/` | 보안 엔지니어 문서 산출물 |

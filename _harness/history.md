@@ -15,6 +15,24 @@
 
 ---
 
+## 2026-04-25 — Obsidian (Claudian) 연동 (obsidian 브랜치)
+
+- **진행 사항**:
+  - 볼트 경로 = 하네스 레포 (`/Users/pole/scripts/harness/harness`) — 파일 이동 불필요
+  - `.claude/CLAUDE.md` → `../CLAUDE.md` 심볼릭 링크 생성 (Claudian이 로드)
+  - `.claude/commands` → `../commands` 심볼릭 링크 생성 (커맨드 볼트 레벨 등록)
+  - `.claudian/` 디렉토리 생성 + `.gitignore` (세션 파일 추적 제외)
+  - CLAUDE.md에 Obsidian 전용 사용 지침 섹션 추가
+  - README에 Obsidian 설정 가이드 추가
+- **역할 분담 결정**:
+  - CLI/VSCode: SE 실행 워크플로 (`/se:plan` ~ `/se:review`)
+  - Obsidian: 학습 노트 (`/teacher:ask`), 문서 마무리 (`/se:doc`), `_harness/` 파일 열람
+- **미결 사항**:
+  - Claudian 플러그인 실제 설치는 사용자가 Obsidian 앱에서 수동 진행 필요
+  - `UserPromptSubmit` 훅이 Claudian 세션에서도 동작하는지 실사용 후 검증 필요
+
+---
+
 ## 2026-04-25 — 슬래시 커맨드 네임스페이스 전환 + 모델 자동 전환 훅 구현
 
 - **진행 사항**:
