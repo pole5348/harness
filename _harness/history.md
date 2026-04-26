@@ -15,6 +15,63 @@
 
 ---
 
+## 2026-04-26 — wiki4lazy 1차 비판 라운드 (`/se:critique`)
+
+- **비판 대상**: wiki4lazy 1차 계획 + 미결 답변 반영안 (작업공간 `/Users/pole/scripts/projects/wiki4lazy`)
+- **사용자 미결 답변 요약**:
+  1. MVP=Obsidian → Confluence/Notion 후속
+  2. Bedrock=Sonnet 3.5 또는 inference profile로 Opus/Claude 4.5 의향
+  3. 컨펌=Slack DM
+  4. 발행 권한 통제 없음 (모두 허용)
+  5. 데이터 분류 정책 없음, 일반 지식만
+  6. 리전=ap-northeast-2 한정
+  7. 비용 한도=월 1만원 미만 (인프라+Bedrock 전체)
+  8. 로그 보존=1일
+  9. IaC=Terraform
+  10. Obsidian 로컬 직접 sync
+- **총평**: 답변 2(Opus) + 답변 6(서울 한정) + 답변 7(1만원) 3중 충돌. 답변 4(권한 없음) + 답변 7(예산) = rate limit 강제 미하면 비용 폭주.
+- **수용 불가 항목**:
+  1. Opus + ap-northeast-2 + 1만원 동시 운영 — Sonnet 3.5 고정으로 수정
+  2. Rate limit 부재 — 권한 통제와 별개로 강제
+  3. Obsidian sync 메커니즘 미결정 — 1단계 산출물에 ADR 의무
+  4. CloudWatch Logs 1일 → 7일 상향
+  5. 컨펌 콜백 HMAC + JTI + TTL 강제
+- **PM/PO 비판**:
+  1. MVP를 가장 어려운 채널(Obsidian 로컬 sync)부터 시작
+  2. 성공 기준 60초 회신이 P50/P95 분리 안 됨
+  3. 단계 10개가 1만원 예산·1인 가정에 비현실적
+  4. README 1차안과 결정 사이 의미 불일치 (Obsidian이 1차 가공인지 발행 채널인지)
+- **보안 비판**:
+  5. Obsidian sync 4개 옵션(SSH/S3/Git/Cloud) 보안 영향 미평가
+  6. 권한 없음 + rate limit 없음 = DoS+비용 폭주 결합
+  7. 데이터 분류 정책 없음 + 입력 가드 없음 — 시크릿 정규식 1차 차단 권장
+  8. CloudWatch 1일 = 보안 사고 사후 분석 불가
+  9. Slack DM 컨펌 = im:write 권한 추가 + 콜백 위변조 표면
+  10. inference profile cross-region = 거주성 위반
+  11. Slack 토큰 회전 정책 부재
+  12. 인젝션 → Obsidian 마크다운 → 로컬 PC 트래킹/RCE 표면
+- **재무 비판**:
+  13. Opus 1회 약 235원 → 약 42회/월에 한도 도달
+  14. Secrets Manager 시크릿 5개 = 2,800원 차지 — 1개 JSON 묶음 또는 SSM SecureString 권장
+  15. NAT Gateway = 예산 4~6배 초과 → Lambda는 VPC 외부 강제 (보안 약화 수용)
+  16. 알람만으로는 차단 안 됨 — AWS Budgets Action 자동 IAM 박탈 권장
+  17. 로그 1일 단축의 절감 효과 미미 (인입량이 비용 결정 요인)
+- **재계획 시 필수 포함**:
+  1. 월 1만원 예산표 (서비스별 단가 + 호출량 가정 + 합계 검증)
+  2. Bedrock 모델=Sonnet 3.5 기본 + Opus 토글·일일 N회 한도
+  3. 사용자별 Rate limit 구체 수치
+  4. Obsidian sync 채널 ADR
+  5. cross-region inference profile 사용 금지 명시
+  6. 컨펌 HMAC + JTI + TTL 메커니즘
+  7. CloudWatch 7일 + (선택) S3 archive 30일
+  8. Markdown 화이트리스트 필터 정책
+  9. AWS Budgets Action 자동 차단 정의
+  10. 단계 6개로 압축
+  11. README 1차안 충돌 해소
+- **다음 단계**: 사용자 결정 후 `/se:plan` 재계획 또는 일부 항목 수용 거절 표명
+
+---
+
 ## 2026-04-26 — ECC 통합 v5 확정 (`/se:confirm` + 구조 개편)
 
 - **계기**: v4 토큰 비용 비판 결과를 사용자가 항목별 결정 → v5 재확정
@@ -346,3 +403,30 @@
   - Confluence, 티스토리, 디자인 MCP 연결 필요 (현재 미연결)
   - 각 프로젝트 시작 시 프로젝트별 서브 디렉토리 생성 규칙 정립 필요
   - execute 단계에서 SBOM 자동화 추가 검토
+
+---
+
+## 2026-04-26 — 하네스 구조 변경: 정의/산출물 경로 분리
+
+- **진행 사항**:
+  - 하네스 파일을 **글로벌 정의(read-only) ↔ 프로젝트별 산출물(read-write)** 두 계층으로 분리
+  - **정의 파일**(절대경로 `/Users/pole/scripts/harness/harness/_harness/...`): 에이전트 시스템 프롬프트(`security_engineer/0X_*.md`, `student/0X_*.md`), `permissions.md`, `execute_library.md`
+  - **산출물**(상대경로 `./_harness/...` — 현재 작업 디렉토리 기준): `history.md`, `plan.md`, `plan/`, `plan_risks.md`, `sbom_report.md`, `review_report.md`, `docs/` 등
+  - 수정한 파일 (총 14개):
+    - `CLAUDE.md` — "공통 지침 #4 파일 위치"에 정의/산출물 분리 규칙 추가, 보안엔지니어/학부생 페르소나 표의 파일 경로를 절대/상대 분리 표기
+    - `commands/se/{critique,confirm,execute,review,doc}.md` — 산출물 경로를 `./_harness/...` 로 변경
+    - `commands/teacher/doc.md` — 산출물 경로를 `./_harness/...` 로 변경
+    - `_harness/security_engineer/{01_plan,02_critique,03_execute,04_review,05_document}.md` — 산출물 표기 변경, `execute_library.md` 참조는 절대경로 유지
+    - `_harness/student/02_document.md` — 학습 문서 저장 위치 변경
+    - `_harness/permissions.md` — 표 안 산출물 경로 표기 변경 + 상단 경로 규약 명시
+  - **중앙화 옵션**: `/se:doc --central` 및 `/teacher:doc` 학부생 모드에서 글로벌 `docs/central/` 으로 수합 가능 — 여러 프로젝트의 산출물을 한 곳에서 보고 싶을 때 사용
+- **이슈**:
+  - 기존 글로벌 `_harness/` 안에 누적된 산출물(`history.md`, `plan.md`, `plan/`, `plan_risks.md`, `review_report.md`)은 그대로 유지 — 새 프로젝트부터 신규 규칙 적용
+  - `safe_write.py` 가 향후 도입되면 CWD 기준 경로 해석 로직 필요 (3단계 후 구현 예정)
+- **조치**:
+  - 모든 슬래시 커맨드/페르소나 정의에서 산출물 경로를 `./_harness/...` 로 통일
+  - CLAUDE.md 공통 지침에 "디렉토리가 없으면 자동 생성" 명시
+- **미결 사항 / 개선 포인트**:
+  - `safe_write.py` 구현 시 CWD 기준 경로 처리 검증 필요
+  - 중앙화 모드 사용 흐름(`docs/central/` 네이밍 규칙 등) 실제 운영 후 다듬을 것
+  - "프로젝트 루트" 기준이 항상 CWD라서 하위 디렉토리에서 슬래시 커맨드 실행 시 산출물이 흩어질 가능성 — 필요 시 git 루트 자동 탐지 도입 검토

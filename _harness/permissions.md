@@ -2,6 +2,8 @@
 
 > 각 에이전트가 사용하는 MCP, Skills, 권한을 한 곳에서 관리한다.
 > 원칙: **필요한 만큼만** 권한을 부여한다. 단계가 끝나면 해당 권한은 해제한다.
+>
+> **경로 규약**: 이 문서는 글로벌 정의 파일(`/Users/pole/scripts/harness/harness/_harness/permissions.md`)이다. 표 안의 산출물 경로는 모두 **CWD 기준 `./_harness/...`** (프로젝트 로컬) 이다.
 
 ---
 
@@ -16,7 +18,7 @@
 | MCP | 필요 없음 (리서치 단계) |
 | Skills | `Plan` subagent |
 | 금지 | 파일 쓰기(Write/Edit), 코드 실행(Bash), 외부 API 호출 |
-| 산출물 | `_harness/security_engineer/plan.md` (최종 확정 시) |
+| 산출물 | `./_harness/security_engineer/plan.md` (최종 확정 시, 프로젝트 로컬) |
 
 ### 2단계 — 비판 (critique)
 
@@ -27,7 +29,7 @@
 | MCP | 필요 없음 |
 | Skills | 없음 (독립 분석) |
 | 금지 | 파일 쓰기(Write/Edit), 코드 실행(Bash) |
-| 산출물 | `_harness/history.md`에 비판 이력 추가 |
+| 산출물 | `./_harness/history.md`에 비판 이력 추가 (프로젝트 로컬) |
 | 주의 | 이전 비판 내용을 참고하지 않는다 (격리 원칙) |
 
 ### 3단계 — 실행 (execute)
@@ -36,10 +38,10 @@
 |---|---|
 | 모델 | claude-sonnet-4-6 |
 | 허용 도구 | Read, Write, Edit, Bash, TodoWrite |
-| MCP | 프로젝트별 상이 — `execute_library.md` 참고 |
-| Skills | 프로젝트별 상이 — `execute_library.md` 참고 |
-| 금지 | 계획 수정, `plan.md` 덮어쓰기 |
-| 산출물 | 실행 결과물, `sbom_report.md`, `_harness/history.md` 업데이트 |
+| MCP | 프로젝트별 상이 — 글로벌 정의 `execute_library.md` 참고 |
+| Skills | 프로젝트별 상이 — 글로벌 정의 `execute_library.md` 참고 |
+| 금지 | 계획 수정, `./_harness/security_engineer/plan.md` 덮어쓰기 |
+| 산출물 | 실행 결과물, `./_harness/security_engineer/sbom_report.md`, `./_harness/history.md` 업데이트 (모두 프로젝트 로컬) |
 
 ### 4단계 — 검토 (review)
 
@@ -50,7 +52,7 @@
 | MCP | 필요 없음 |
 | Skills | `security-review`, `review` (필요 시) |
 | 금지 | 코드 수정(Edit/Write), Bash 실행 |
-| 산출물 | `_harness/security_engineer/review_report.md` |
+| 산출물 | `./_harness/security_engineer/review_report.md` (프로젝트 로컬) |
 
 ### 5단계 — 문서화 (document)
 
@@ -61,7 +63,7 @@
 | MCP | Confluence MCP (연결 시), 디자인 툴 MCP (연결 시) |
 | Skills | 없음 |
 | 금지 | 코드 수정, Bash 실행 |
-| 산출물 | 정형화된 문서 파일 |
+| 산출물 | 정형화된 문서 파일 → 기본 `./_harness/security_engineer/docs/` (프로젝트 로컬), 중앙화 시 `/Users/pole/scripts/harness/harness/_harness/security_engineer/docs/central/` |
 
 ---
 
@@ -87,7 +89,7 @@
 | MCP | Confluence MCP, 티스토리 MCP (연결 시) |
 | Skills | 없음 |
 | 금지 | 코드 실행(Bash) |
-| 산출물 | `_harness/student/` 하위 학습 문서 |
+| 산출물 | `./_harness/student/docs/` (프로젝트 로컬). 중앙화 시 `/Users/pole/scripts/harness/harness/_harness/student/docs/central/` |
 
 ---
 
@@ -113,8 +115,9 @@
 
 ### 코딩 규칙 — history/status 직접 쓰기 금지 (3단계 구현 후 강제)
 
-> `hooks/`, `commands/` 내에서 `_harness/history*.md` 또는 `_harness/status.md`에 직접 `open()+write()` 사용 금지.
+> `hooks/`, `commands/` 내에서 `./_harness/history*.md` 또는 `./_harness/status.md`에 직접 `open()+write()` 사용 금지.
 > 3단계 `hooks/lib/safe_write.py` 구현 후 단일 진입점으로만 기록한다. pre-commit으로 강제.
+> *(이때 산출물은 항상 현재 작업 디렉토리(CWD) 기준 `./_harness/...`)*
 
 ---
 

@@ -49,7 +49,7 @@
 - 알려진 CVE
 - 라이선스 이슈
 
-### 출력 형식 — `review_report.md`
+### 출력 형식 — `./_harness/security_engineer/review_report.md` (현재 작업 디렉토리 기준 — 프로젝트 로컬)
 
 ```markdown
 # 검토 리포트: [프로젝트명]
@@ -95,4 +95,4 @@
 [SE] [검토]
 ```
 
-검토 완료 후 → `review_report.md` 저장 → `[SE] [문서화]` 단계로 넘긴다.
+검토 완료 후 → `./_harness/security_engineer/review_report.md` (프로젝트 로컬) 저장 → `[SE] [문서화]` 단계로 넘긴다.

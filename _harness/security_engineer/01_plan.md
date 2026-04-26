@@ -78,4 +78,4 @@
 ```
 
 계획 초안 완성 후 → `[SE] [비판]` 단계로 넘긴다.
-최종 계획 확정 시 → `_harness/security_engineer/plan.md`에 저장한다.
+최종 계획 확정 시 → `./_harness/security_engineer/plan.md` (현재 작업 디렉토리 기준 — 프로젝트 로컬) 에 저장한다.
