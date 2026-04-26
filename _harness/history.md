@@ -15,6 +15,58 @@
 
 ---
 
+## 2026-04-26 — ECC 통합 v5 확정 (`/se:confirm` + 구조 개편)
+
+- **계기**: v4 토큰 비용 비판 결과를 사용자가 항목별 결정 → v5 재확정
+- **사용자 결정 수용 매핑**:
+  - PM-1: plan.md 슬라이싱 (헤더+로드맵+링크 / 단계 본문 `plan/{N}.md`) ✅
+  - PM-2: 의무 로드 파일 1~2개 압축, permissions/execute_library 조건부 로드 ✅
+  - PM-3: `/se:critique --diff` 옵션 도입 (격리 원칙 일부 완화) ✅
+  - PM-4: `/se:backup` 변경 없으면 skip + 수동 운영 전제 ✅
+  - PM-5: 사용자 미해석 — 비판에서 제외
+  - SEC-6/7/8: 기존대로 유지
+  - FIN-9: PM-3 방향으로 진행, 모델은 plan/critique=Opus 그대로 유지
+  - FIN-10: 기존 유지 (동일 세션 내 단계 묶음 권장)
+  - FIN-11: cautions.md를 CLAUDE.md에서 분리, `/se:learn audit` 호출 시에만 로드, 30일 후 archive ✅
+  - FIN-12: review_report 압축 요약(Haiku 50줄 미만) + 원본 archive ✅
+  - FIN-13: 분기 history 헤더(`SESSION_ID`, `START`) + 결정론 스크립트 `merge_history.py` ✅
+  - FIN-14: 리스크 표 → `plan_risks.md` 분리, review/doc 단계에서만 로드 ✅
+- **구조 변경 산출물**:
+  - 신규: `_harness/security_engineer/plan/01.md ~ 10.md`, `_harness/security_engineer/plan_risks.md`
+  - 갱신: `_harness/security_engineer/plan.md` (372줄 → 약 120줄), `commands/se/execute.md`, `commands/se/critique.md`
+- **다음 단계**: `/se:execute` 로 2단계 (훅 보안 신뢰 루트) 진행 권장. 단, README.md 종합 갱신 후 진입 권장.
+
+---
+
+## 2026-04-25 — ECC 통합 v4 토큰 비용 비판 라운드 (`/se:critique`)
+
+- **비판 대상**: plan.md (v4 확정본) — 사용자 호소 "토큰 소비량이 빠른 것 같아"
+- **비판자 모델**: claude-opus-4-7
+- **총평**: plan.md 372줄 + 매 단계 4파일 의무 로드 + Opus 반복 사용 + 모델 자동 전환에 의한 캐시 무효화가 토큰 폭증의 구조적 원인.
+- **PM/PO 관점 비판**:
+  1. plan.md 길이 상한 부재 — 무한 누적
+  2. 매 단계 4파일 의무 로드 — 단계당 8~12K 토큰 고정 비용
+  3. 격리 원칙 vs 토큰 효율 충돌 (비판 N회 = plan.md N번 풀 입력)
+  4. `/se:backup` 빈도 캡 부재
+  5. 신규 커맨드 4종 추가 비용
+- **보안 관점 비판**:
+  6. reviewer 서브에이전트 별도 컨텍스트 입력 중복
+  7. extractor 매 결정마다 외부 출처 탐색 (LLM 호출 가정 시 폭증)
+  8. `/se:summary` 짧은 세션 거부 정책 부재
+- **재무 관점 비판**:
+  9. Opus 4.7 단가(Sonnet의 약 5배) — plan/critique 반복 사용
+  10. 모델 자동 전환 → 프롬프트 캐시 무효화
+  11. cautions.md 자동 prepend → CLAUDE.md 부풀리기
+  12. review_report/sbom_report 산출물 누적
+  13. history 다중 세션 통합 시 입력 폭증
+  14. 리스크 표 90줄 매 라운드 입력
+- **수용 불가 항목**: 없음 (비기능 요구 — 사용자 결정 영역)
+- **즉시 개선 권장**: plan/critique 중간 라운드 Sonnet + 최종 Opus, plan.md 슬라이싱, history 통합 결정론 스크립트, backup 빈도 캡
+- **재계획 시 반드시 포함**: plan.md 슬라이싱 정책, 의무 로드 파일 축소표, 모델 사용 정책 갱신, 결정론 스크립트 vs LLM 명시, 산출물 누적 정책, 빈도 캡, 토큰 베이스라인 측정 재개
+- **다음 단계**: 사용자 판단 → `/se:plan` 으로 토큰 절감 v5 재계획 또는 `/se:confirm` 으로 현 plan 유지
+
+---
+
 ## 2026-04-25 — ECC 통합 v4 1단계 실행 완료 (`/se:execute`)
 
 - **페르소나**: 보안 엔지니어 / 실행 단계
