@@ -91,6 +91,33 @@
 
 ---
 
+## 보안 정책 결정 사항
+
+### GPG Signed Commit — 미도입 결정 (1단계 확정)
+
+| 항목 | 내용 |
+|---|---|
+| 결정 | GPG 서명 커밋 **미도입** (운영 안정화 후 재검토) |
+| 현재 보호 수단 | `manifest_root.sha256` + `chmod 600` |
+| 재검토 시점 | 7일 운영 무사고 후 (10단계 이후) |
+| 리스크 | `chmod 600` 단독 보호 한계 — 사용자 권한 RCE 시 무력화 가능 |
+| 근거 | 초기 운영 부담 최소화. 안정화 전 GPG 설정 복잡도가 이점 초과 |
+
+### Python 경로 — /usr/bin/python3 고정 (1단계 확정)
+
+| 항목 | 내용 |
+|---|---|
+| 경로 | `/usr/bin/python3` (Python 3.9.6, macOS 시스템) |
+| 적용 범위 | `settings.json` 훅 명령, 모든 `hooks/*.py` shebang |
+| 변경 시 | 이 파일 + `settings.json` + 각 훅 shebang 동시 갱신 |
+
+### 코딩 규칙 — history/status 직접 쓰기 금지 (3단계 구현 후 강제)
+
+> `hooks/`, `commands/` 내에서 `_harness/history*.md` 또는 `_harness/status.md`에 직접 `open()+write()` 사용 금지.
+> 3단계 `hooks/lib/safe_write.py` 구현 후 단일 진입점으로만 기록한다. pre-commit으로 강제.
+
+---
+
 ## MCP 연결 현황
 
 | MCP 서버 | 용도 | 연결 여부 | 관련 단계 |
