@@ -15,6 +15,78 @@
 
 ---
 
+## 2026-04-29 — README.md v5.2 반영
+
+- **작업**: README 전체를 v5.2 변경(Windows 지원 + Karpathy 4원칙 + plugin.json) 에 맞춰 업데이트
+- **수정 섹션**:
+  - 헤더: v5.2 변경 사항 한 줄 요약 추가
+  - 경로 규약: macOS/Windows 양쪽 절대경로 표기
+  - §1 디렉토리 구조: `.claude-plugin/`, `model_switch.ps1`, `rules/common/karpathy_guidelines.md` 추가
+  - §2 매트릭스: `/se:plan`·`/se:critique`·`/se:execute` 행에 v5.2 변경(Assumptions·Verification·Karpathy 의무 로드) 표기
+  - §4 모델 자동 전환: Windows/macOS OS별 훅 파일 안내 추가
+  - §5 사용자 참고 파일: `karpathy_guidelines.md`, `plugin.json` 추가
+  - §6 Security Guardrails: `model_switch.ps1`, `karpathy_guidelines.md` 점검 행 추가
+  - §7 보안 정책 표: Windows PowerShell 런타임 행 추가
+  - §8 토큰 비용 가드: Verification 루프·Assumptions 사전 확정 효과 2행 추가
+  - §9 심볼릭 링크: macOS 구문은 유지 + Windows junction/hardlink 신규 섹션 (PowerShell 명령 + settings.json 예시)
+  - §10 오픈소스 비교: Karpathy 컬럼 추가, Windows 지원·플러그인 패키징·4원칙 행 추가
+  - §11 빠른 시작: OS별 분기, Assumptions/Verification 확인 안내
+  - §12 도움말: karpathy_guidelines.md·plugin.json 링크 추가, 변경 이력 표 신규
+- **변경 파일**: `README.md`, `_harness/history.md`
+
+---
+
+## 2026-04-29 — Karpathy 4원칙 통합 + 플러그인 패키징 (v5.2)
+
+- **작업**: `forrestchang/andrej-karpathy-skills` 와 비교 분석 후 5개 개선 사항 적용 (Cursor IDE 호환성 1개는 제외)
+- **진행 사항**:
+  1. **`rules/common/karpathy_guidelines.md` 신규 생성** — Karpathy 4원칙 (Think Before / Simplicity / Surgical / Goal-Driven) + 보안 엔지니어 페르소나 적용 우선순위
+  2. **`01_plan.md` 출력 형식 강화**:
+     - 행동 원칙에 1·4 원칙 의무화 명시
+     - 출력 템플릿에 `Assumptions` 표 (가정 표면화) + 단계별 `성공 기준 (Verification)` 항목 추가
+  3. **`02_critique.md` 비판 관점 추가**:
+     - PM/PO 관점에 "가정 누락" / "검증 기준 부재" / "과설계" 비판 항목 추가 (Karpathy 1·2·4 원칙 위반 검출)
+  4. **`03_execute.md` Surgical Changes 게이트 + Karpathy 의무 로드**:
+     - "Karpathy 4원칙 의무 적용" 섹션 신규 (4가지 행동 규칙 명시)
+     - 실행 전 체크리스트에 `Assumptions` 확정·`Verification` 존재 검증 추가
+  5. **`commands/se/execute.md` 의무 로드 갱신**:
+     - `karpathy_guidelines.md` 모든 실행에서 의무 로드 명시
+     - 잔존 macOS 경로 2건 추가 정리
+  6. **`.claude-plugin/plugin.json` 신규 생성** — 향후 팀 배포 가능한 플러그인 형식. 버전 5.2.0, Windows primary, PowerShell shell.
+- **변경 파일 (7개)**:
+  - `rules/common/karpathy_guidelines.md` (신규)
+  - `.claude-plugin/plugin.json` (신규)
+  - `_harness/security_engineer/01_plan.md`
+  - `_harness/security_engineer/02_critique.md`
+  - `_harness/security_engineer/03_execute.md`
+  - `commands/se/execute.md`
+  - `_harness/history.md`
+- **효과**:
+  - `/se:plan` 단계: 가정·검증 기준이 템플릿에 강제됨 → 후반 재작업 비용 절감
+  - `/se:critique` 단계: Karpathy 위반 자동 감지 → 비판 일관성 향상
+  - `/se:execute` 단계: 인접 코드 "개선" 차단 + Verification 통과까지 자율 루프 가능
+  - 플러그인 형식: 향후 동료에게 셋업 일괄 배포 가능
+- **참고**: Karpathy 가이드라인 출처는 https://github.com/forrestchang/andrej-karpathy-skills
+
+---
+
+## 2026-04-27 — Windows 환경 초기 세팅
+
+- **작업**: macOS → Windows 환경 마이그레이션 및 초기 설정
+- **진행 사항**:
+  - 모든 파일의 macOS 절대경로 `/Users/pole/scripts/harness/harness/` → Windows 경로 `C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/` 로 일괄 교체 (CLAUDE.md, commands/se/*, commands/teacher/*, _harness/permissions.md, _harness/security_engineer/03_execute.md, 05_document.md, review_report.md, _harness/student/02_document.md)
+  - `hooks/model_switch.ps1` 신규 생성 — Python 미설치 환경 대응, PowerShell 버전
+  - `~/.claude/` 구조 설정:
+    - `~/.claude/commands/se` → junction → 하네스 `commands/se/`
+    - `~/.claude/commands/teacher` → junction → 하네스 `commands/teacher/`
+    - `~/.claude/hooks/model_switch.ps1` → hardlink → 하네스 `hooks/model_switch.ps1`
+    - `~/.claude/CLAUDE.md` → hardlink → 하네스 `CLAUDE.md`
+  - `~/.claude/settings.json` 훅 설정 완료 (`UserPromptSubmit` → PowerShell 훅)
+  - 훅 동작 확인: `/se:plan` 입력 시 `claude-opus-4-7` 자동 전환 성공
+- **환경**: Windows 11 Pro, Python 미설치, PowerShell 5.1
+
+---
+
 ## 2026-04-26 — wiki4lazy 1차 비판 라운드 (`/se:critique`)
 
 - **비판 대상**: wiki4lazy 1차 계획 + 미결 답변 반영안 (작업공간 `/Users/pole/scripts/projects/wiki4lazy`)

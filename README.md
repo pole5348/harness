@@ -3,13 +3,14 @@
 > Claude Code 하네스 엔지니어링 기반의 프롬프트 관리 레포입니다.
 > CLAUDE.md 변경 이력을 Git으로 추적하고, 페르소나별 에이전트 워크플로를 정의합니다.
 > 토큰 비용을 의식한 슬라이싱·diff·skip 메커니즘을 v5에서 도입했습니다.
+> v5.2부터 **Windows 환경 지원** + **Karpathy 4원칙**(Think Before / Simplicity / Surgical / Goal-Driven) 의무 적용 + **`.claude-plugin/plugin.json`** 패키징 추가.
 
 ---
 
-## 1. 디렉토리 구조 (최종 v5)
+## 1. 디렉토리 구조 (v5.2)
 
-> **경로 규약 (v5.1 — 정의/산출물 분리)**:
-> - **정의 파일**(에이전트 시스템 프롬프트, `permissions.md`, `execute_library.md`)은 글로벌 위치 `/Users/pole/scripts/harness/harness/_harness/` 에 보관하고 **절대경로**로 참조한다.
+> **경로 규약 (v5.1 — 정의/산출물 분리, v5.2 Windows 지원)**:
+> - **정의 파일**(에이전트 시스템 프롬프트, `permissions.md`, `execute_library.md`, `karpathy_guidelines.md`)은 글로벌 위치 `C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/_harness/`(또는 `rules/common/`) 에 보관하고 **절대경로**로 참조한다. macOS 환경에서는 `/Users/pole/scripts/harness/harness/...` 로 참조 (양쪽 호환을 위한 컨벤션).
 > - **산출물**(`history.md`, `plan.md`, `plan/`, `plan_risks.md`, `sbom_report.md`, `review_report.md`, `docs/` 등)은 **현재 작업 디렉토리(CWD) 기준 `./_harness/`** 에 저장된다 — 즉 프로젝트마다 `_harness/`가 따로 생긴다. 디렉토리가 없으면 자동 생성.
 > - 여러 프로젝트의 산출물을 한 곳에서 보고 싶을 때는 `/se:doc --central` (또는 학부생 `/teacher:doc` 중앙화 옵션)으로 글로벌 `_harness/{persona}/docs/central/` 에 수합한다.
 
@@ -17,12 +18,15 @@
 
 ```
 harness/
-├── CLAUDE.md                           # 글로벌 지침 (↔ ~/.claude/CLAUDE.md 심볼릭 링크)
+├── CLAUDE.md                           # 글로벌 지침 (↔ ~/.claude/CLAUDE.md 심볼릭/하드링크)
 ├── README.md                           # 본 문서
 ├── .env.example                        # 시크릿 슬롯 템플릿 (Git 추적)
 ├── .gitignore                          # 시크릿/격리/임시 파일 제외 규칙
-├── hooks/                              # 훅 스크립트 (↔ ~/.claude/hooks/ 심볼릭)
-│   ├── model_switch.py                 # UserPromptSubmit — 커맨드별 모델 전환
+├── .claude-plugin/                     # ★ v5.2 — Claude Code 플러그인 패키징 (팀 배포용)
+│   └── plugin.json                     # 플러그인 메타데이터 (commands/hooks/rules 묶음)
+├── hooks/                              # 훅 스크립트 (↔ ~/.claude/hooks/ 심볼릭/하드링크)
+│   ├── model_switch.py                 # UserPromptSubmit — 커맨드별 모델 전환 (macOS/Linux)
+│   ├── model_switch.ps1                # ★ v5.2 — Windows PowerShell 버전 (Python 미설치 환경)
 │   ├── session_start.py                # SessionStart — 매니페스트 검증 (2단계)
 │   ├── session_stop.py                 # Stop — 메타데이터 기록 (5단계)
 │   ├── bash_safety.py                  # PreToolUse Bash — L1~L4 위험도 (6단계)
@@ -31,7 +35,7 @@ harness/
 │       ├── safe_write.py               # history/status 단일 마스킹 진입점 (3단계)
 │       ├── secret_patterns.json        # 정적 시크릿 패턴 (3단계)
 │       └── bash_patterns.json          # Bash 위험 패턴 (6단계)
-├── commands/                           # 슬래시 커맨드 (↔ ~/.claude/commands/ 심볼릭)
+├── commands/                           # 슬래시 커맨드 (↔ ~/.claude/commands/ 심볼릭/junction)
 │   ├── se/                             # 보안 엔지니어
 │   │   ├── plan.md, critique.md, confirm.md, execute.md, review.md, doc.md
 │   │   ├── backup.md                   # /se:backup (4단계)
@@ -43,8 +47,10 @@ harness/
 │       └── doc.md
 ├── agents/                             # 서브에이전트 정의 (↔ ~/.claude/agents/ 심볼릭)
 │   └── code-security-reviewer.md       # (8단계)
-├── rules/                              # 보안 코딩 규칙 (7단계)
-│   └── common/security.md
+├── rules/                              # 코딩·보안 규칙
+│   └── common/
+│       ├── security.md                 # 보안 코딩 규칙 (7단계)
+│       └── karpathy_guidelines.md      # ★ v5.2 — LLM 코딩 4원칙 (execute 의무 로드)
 ├── skills/                             # 스킬 정의 (9단계)
 │   └── continuous_learning/extractor.md
 ├── scripts/                            # 결정론 유틸리티 (LLM 미호출)
@@ -98,14 +104,14 @@ harness/
 ## 2. 단계별 파일 로드·수정 매트릭스
 
 > **토큰 가드**: 단계 진입 시 의무 로드 파일을 1~2개로 제한. 그 외는 변경/필요 시점에만.
-> **경로 표기**: `./_harness/...` 는 프로젝트 로컬(CWD), 그 외(예: `permissions.md`, `01_plan.md`, `execute_library.md`, `cautions.md`, `whitelist.yaml`)는 글로벌 정의(`/Users/pole/scripts/harness/harness/_harness/...`).
+> **경로 표기**: `./_harness/...` 는 프로젝트 로컬(CWD), 그 외(예: `permissions.md`, `01_plan.md`, `execute_library.md`, `karpathy_guidelines.md`, `cautions.md`, `whitelist.yaml`)는 글로벌 정의(Windows: `C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/...`).
 
 | 슬래시 커맨드 | 모델 | 의무 로드 (자동) | 조건부 로드 | 자동 수정 파일 |
 |---|---|---|---|---|
-| `/se:plan` | Opus 4.7 | `01_plan.md`(글로벌), (이전) `./_harness/security_engineer/plan.md` | 없음 | (대화에만 — 확정 전 미저장) |
-| `/se:critique` | Opus 4.7 | `02_critique.md`(글로벌), `./_harness/security_engineer/plan.md`(슬림) + 대상 `./_harness/security_engineer/plan/{N}.md` 1개 | `--diff` 모드: `git diff` 직전 라운드만 | `./_harness/history.md` (비판 이력 추가) |
+| `/se:plan` | Opus 4.7 | `01_plan.md`(글로벌, **Assumptions·Verification 템플릿 포함 v5.2**), (이전) `./_harness/security_engineer/plan.md` | 없음 | (대화에만 — 확정 전 미저장) |
+| `/se:critique` | Opus 4.7 | `02_critique.md`(글로벌, **Karpathy 위반 자동 검출 v5.2**), `./_harness/security_engineer/plan.md`(슬림) + 대상 `./_harness/security_engineer/plan/{N}.md` 1개 | `--diff` 모드: `git diff` 직전 라운드만 | `./_harness/history.md` (비판 이력 추가) |
 | `/se:confirm` | Sonnet 4.6 | `commands/se/confirm.md` 절차 | 없음 | `./_harness/security_engineer/{plan.md, plan/{N}.md, plan_risks.md}`, `./_harness/history.md` |
-| `/se:execute N` | Sonnet 4.6 | `03_execute.md`(글로벌), `./_harness/security_engineer/plan/{N}.md` 1개 | `execute_library.md`(글로벌, 외부 의존성 시), `permissions.md`(글로벌, 권한 변경 시), `rules/common/security.md`(7단계 후) | 단계 산출물, `./_harness/security_engineer/sbom_report.md`, `./_harness/history.md`, `./_harness/security_engineer/plan.md` 로드맵 체크 |
+| `/se:execute N` | Sonnet 4.6 | `03_execute.md`(글로벌), `./_harness/security_engineer/plan/{N}.md` 1개, **`rules/common/karpathy_guidelines.md`(글로벌, v5.2)** | `execute_library.md`(글로벌, 외부 의존성 시), `permissions.md`(글로벌, 권한 변경 시), `rules/common/security.md`(7단계 후) | 단계 산출물, `./_harness/security_engineer/sbom_report.md`, `./_harness/history.md`, `./_harness/security_engineer/plan.md` 로드맵 체크 |
 | `/se:review` | Sonnet 4.6 | `04_review.md`(글로벌), 단계 산출물, `./_harness/security_engineer/plan_risks.md` | `./_harness/security_engineer/sbom_report.md`, `./_harness/security_engineer/archive/`(필요 시) | `./_harness/security_engineer/review_report.md` (압축 요약), `./_harness/security_engineer/archive/{YYYYMM}/` (원본 이동) |
 | `/se:doc [A/B/C/D]` | Haiku 4.5 | `05_document.md`(글로벌), `./_harness/security_engineer/{review_report.md, plan.md(슬림), plan_risks.md}` | 없음 | 기본 `./_harness/security_engineer/docs/` (프로젝트 로컬). `--central` 시 글로벌 `_harness/security_engineer/docs/central/` |
 | `/se:backup` | Sonnet 4.6 | `commands/se/backup.md` 절차 | (변경 없으면 즉시 skip) | `./_harness/status.md` (변경 시에만), `./_harness/history.md` 통합 |
@@ -158,7 +164,9 @@ harness/
 
 ---
 
-## 4. 모델 할당 (자동 전환 — `model_switch.py`)
+## 4. 모델 할당 (자동 전환 — `model_switch.py` / `model_switch.ps1`)
+
+> **OS별 훅**: Windows 환경은 `hooks/model_switch.ps1` (PowerShell), macOS/Linux 환경은 `hooks/model_switch.py` (Python 3) 사용. 두 파일은 동일한 로직·매핑을 가지며 `~/.claude/settings.json` 의 `UserPromptSubmit` 훅으로 등록한다.
 
 | 커맨드 | 모델 | 단가 비교 |
 |---|---|---|
@@ -182,12 +190,14 @@ harness/
 | ★★★ | `./_harness/security_engineer/plan/{N}.md` | 프로젝트 산출물 | 진입할 단계 본문 |
 | ★★ | `./_harness/history.md` | 프로젝트 산출물 | 세션 재개 시 가장 먼저 |
 | ★★ | [_harness/permissions.md](_harness/permissions.md) | 글로벌 정의 | 권한·보안 정책 변경 시 |
+| ★★ | [rules/common/karpathy_guidelines.md](rules/common/karpathy_guidelines.md) | 글로벌 정의 | `/se:execute` 단계 의무 로드 (v5.2 신규) |
 | ★★ | `./_harness/security_engineer/plan_risks.md` | 프로젝트 산출물 | review/doc 단계 또는 의사결정 시 |
 | ★ | [_harness/security_engineer/execute_library.md](_harness/security_engineer/execute_library.md) | 글로벌 정의 | 외부 라이브러리·MCP 사용 시 |
 | ★ | `./_harness/security_engineer/review_report.md` | 프로젝트 산출물 | 검토 직후 |
 | ★ | [.env.example](.env.example) | 글로벌 정의 | 새 시크릿 슬롯 추가 시 |
+| ★ | [.claude-plugin/plugin.json](.claude-plugin/plugin.json) | 글로벌 정의 | 팀 배포·플러그인 메타데이터 (v5.2 신규) |
 
-> 프로젝트 산출물 경로(`./_harness/...`)는 슬래시 커맨드를 실행한 작업 디렉토리(CWD) 기준이라 프로젝트마다 다르다. 글로벌 정의 파일은 위 마크다운 링크가 가리키는 절대경로 `/Users/pole/scripts/harness/harness/_harness/...` 의 단일 사본이다.
+> 프로젝트 산출물 경로(`./_harness/...`)는 슬래시 커맨드를 실행한 작업 디렉토리(CWD) 기준이라 프로젝트마다 다르다. 글로벌 정의 파일은 위 마크다운 링크가 가리키는 절대경로 (Windows: `C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/...`) 의 단일 사본이다.
 
 ---
 
@@ -201,7 +211,9 @@ harness/
 | [_harness/permissions.md](_harness/permissions.md) | **월 1회** | 단계별 허용 도구·금지 항목, GPG 도입 시점, Python 경로 | 모든 단계의 권한 경계 |
 | [.gitignore](.gitignore) | **변경 시 즉시** | `.env*` 패턴, quarantine, history 분기 | 시크릿 누출 직접 영향 |
 | [.env.example](.env.example) | 새 시크릿 추가 시 | 슬롯 정의 (값 없음) | 동적 마스킹 패턴 등록 대상 |
-| [hooks/model_switch.py](hooks/model_switch.py) | 신규 커맨드 추가 시 | 매핑 정확성, regex 안정성 | 모델 자동 전환 핵심 |
+| [hooks/model_switch.py](hooks/model_switch.py) | 신규 커맨드 추가 시 | 매핑 정확성, regex 안정성 (macOS/Linux) | 모델 자동 전환 핵심 |
+| [hooks/model_switch.ps1](hooks/model_switch.ps1) | 신규 커맨드 추가 시 | 매핑 정확성, regex 안정성 (Windows) | 모델 자동 전환 핵심 — `model_switch.py` 와 동기화 필수 |
+| [rules/common/karpathy_guidelines.md](rules/common/karpathy_guidelines.md) | **반기 1회** | 4원칙 정의 변경 여부, 페르소나 적용 우선순위 | `/se:execute` 코딩 품질 가드 |
 | [hooks/manifest.sha256](hooks/manifest.sha256) | **훅 변경 시 즉시** (자동) | SHA256 일치 여부 | 훅 변조 검증 |
 | [~/.claude/manifest_root.sha256](~/.claude/manifest_root.sha256) | **훅 변경 시 즉시** (자동) | 신뢰 루트 (chmod 600) | 매니페스트 변조 검증 |
 | [hooks/lib/safe_write.py](hooks/lib/safe_write.py) | 시크릿 패턴 추가 시 | 정적/동적 마스킹 적용 범위 | history/status 누출 차단 |
@@ -228,7 +240,8 @@ harness/
 
 | 정책 | 결정 | 근거 | 재검토 시점 |
 |---|---|---|---|
-| Python 경로 | `/usr/bin/python3` 고정 (3.9.6) | 가상환경/brew 혼용 회피 | Python 메이저 업그레이드 시 |
+| Python 경로 (macOS/Linux) | `/usr/bin/python3` 고정 (3.9.6) | 가상환경/brew 혼용 회피 | Python 메이저 업그레이드 시 |
+| 훅 런타임 (Windows) | PowerShell 5.1 + `model_switch.ps1` | Python 미설치 환경 대응 (v5.2) | Python 도입 시 .py 로 전환 가능 |
 | GPG signed commit | **미도입** | 초기 운영 부담 최소화 | 7일 운영 무사고 후 (10단계 이후) |
 | 매니페스트 신뢰 루트 보호 | `chmod 600` | GPG 미도입 대안 | GPG 전환 시 |
 | 시크릿 마스킹 | `safe_write.py` 단일 진입점 (3단계 후) | 다양한 우회 경로 차단 | 분기 1회 패턴 점검 |
@@ -254,10 +267,14 @@ harness/
 | `cautions.md` 분리 | CLAUDE.md 자동 포함 ❌ | 매 세션 1~2K 고정 비용 제거 |
 | `review_report` 압축 | Haiku 50줄 미만 + 원본 archive | doc 단계 누적 토큰 70% 절감 |
 | 의무 로드 표 (위 §2) | 단계별 1~2개 파일만 자동 로드 | 단계당 8~12K 고정 비용 제거 |
+| Karpathy Verification 루프 (v5.2) | `/se:execute` 단계 검증 통과까지 자율 반복 | 사용자 확인 라운드 트립 감소 → 라운드당 5~15K 절감 |
+| Karpathy Assumptions 사전 확정 (v5.2) | `/se:plan` 단계 가정 표면화 | 후반 재작업으로 인한 plan→execute 재진입 비용 회피 |
 
 ---
 
-## 9. 심볼릭 링크 설정
+## 9. 심볼릭 링크 / Junction / Hardlink 설정
+
+### macOS / Linux (심볼릭 링크)
 
 ```bash
 # 이미 설정 완료 — 아래는 재설정이 필요할 때만 사용
@@ -275,37 +292,89 @@ ln -s /Users/pole/scripts/harness/harness/agents/code-security-reviewer.md ~/.cl
 ls -la ~/.claude/CLAUDE.md ~/.claude/hooks/ ~/.claude/commands/
 ```
 
+### Windows (Junction + Hardlink)  — v5.2
+
+> Windows는 일반 사용자 권한에서 심볼릭 링크 생성이 제한적이므로, 디렉토리는 **junction**, 파일은 **hardlink** 로 대체한다. 모두 같은 볼륨(C:)에서만 동작.
+
+PowerShell:
+```powershell
+$harness = "C:\Users\tngus\OneDrive\바탕 화면\scripts\harness"
+$claude  = "$env:USERPROFILE\.claude"
+
+# 디렉토리 (junction)
+cmd /c mklink /J "$claude\commands\se"      "$harness\commands\se"
+cmd /c mklink /J "$claude\commands\teacher" "$harness\commands\teacher"
+
+# 파일 (hardlink)
+cmd /c mklink /H "$claude\CLAUDE.md"               "$harness\CLAUDE.md"
+cmd /c mklink /H "$claude\hooks\model_switch.ps1"  "$harness\hooks\model_switch.ps1"
+```
+
+`~/.claude/settings.json` 의 훅 등록(Windows):
+```json
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NonInteractive -ExecutionPolicy Bypass -File C:\\Users\\tngus\\.claude\\hooks\\model_switch.ps1"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+확인:
+```powershell
+Get-ChildItem "$env:USERPROFILE\.claude" -Force
+echo '{"prompt":"/se:plan test"}' | powershell -File "$env:USERPROFILE\.claude\hooks\model_switch.ps1"
+```
+
+> **Hardlink 주의**: 양쪽 어느 쪽이든 편집 시 동기화되지만, **삭제 후 새로 생성**하면 링크가 끊어진다. 그럴 때는 위 `mklink /H` 를 다시 실행한다. Junction은 source 디렉토리 변경(이름·이동)에 영향을 받으므로 하네스 레포 위치 변경 시 재생성 필요.
+
 ---
 
 ## 10. 오픈소스 참고
 
-[everything-claude-code](https://github.com/affaan-m/everything-claude-code) 참고하여 커스텀 구성.
+- [everything-claude-code](https://github.com/affaan-m/everything-claude-code) — 워크플로/구조 참고하여 커스텀 구성.
+- [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills) — **v5.2부터 통합**. Karpathy의 LLM 코딩 4원칙을 `rules/common/karpathy_guidelines.md` 로 가져와 `/se:execute` 의무 로드.
 
-| 요구사항 | 오픈소스 | 이 레포 |
-|---|---|---|
-| `history.md` 프로젝트 이력 추적 | ❌ | ✅ |
-| 기본 언어 한국어 | ❌ (영어) | ✅ |
-| 페르소나 분리 | ❌ | ✅ (보안엔지니어 / 학부생) |
-| 계획 에이전트 | △ (planner, 범용) | ✅ (보안 특화, Opus) |
-| 비판 에이전트 + 루프 | ❌ | ✅ (`--diff` 옵션 포함) |
-| 실행 에이전트 + SBOM | △ (SBOM 없음) | ✅ |
-| 검토 에이전트 + 압축 archive | △ (부분적) | ✅ |
-| 문서화 에이전트 (4 타입) | ❌ | ✅ |
-| 단계별 권한 관리 md | ❌ | ✅ |
-| 훅 기반 모델 자동 전환 | ❌ | ✅ |
-| 시크릿 마스킹 단일 진입점 | ❌ | ✅ (3단계 구현 예정) |
-| 매니페스트 3단계 신뢰 루트 | ❌ | ✅ (2단계 구현 예정) |
-| `/se:note` + decisions_index | ❌ | ✅ (9단계 구현 예정) |
-| 토큰 비용 가드 (슬라이싱·skip·diff) | ❌ | ✅ (v5 신규) |
+| 요구사항 | everything-claude-code | karpathy-skills | 이 레포 |
+|---|---|---|---|
+| `history.md` 프로젝트 이력 추적 | ❌ | ❌ | ✅ |
+| 기본 언어 한국어 | ❌ (영어) | ❌ (영어) | ✅ |
+| 페르소나 분리 | ❌ | ❌ | ✅ (보안엔지니어 / 학부생) |
+| 계획 에이전트 | △ (planner, 범용) | ❌ | ✅ (보안 특화, Opus) |
+| 비판 에이전트 + 루프 | ❌ | ❌ | ✅ (`--diff` 옵션 포함) |
+| 실행 에이전트 + SBOM | △ (SBOM 없음) | ❌ | ✅ |
+| 검토 에이전트 + 압축 archive | △ (부분적) | ❌ | ✅ |
+| 문서화 에이전트 (4 타입) | ❌ | ❌ | ✅ |
+| 단계별 권한 관리 md | ❌ | ❌ | ✅ |
+| 훅 기반 모델 자동 전환 | ❌ | ❌ | ✅ (Python + PowerShell) |
+| 시크릿 마스킹 단일 진입점 | ❌ | ❌ | ✅ (3단계 구현 예정) |
+| 매니페스트 3단계 신뢰 루트 | ❌ | ❌ | ✅ (2단계 구현 예정) |
+| `/se:note` + decisions_index | ❌ | ❌ | ✅ (9단계 구현 예정) |
+| 토큰 비용 가드 (슬라이싱·skip·diff) | ❌ | ❌ | ✅ (v5 신규) |
+| LLM 코딩 4원칙 (Think/Simplicity/Surgical/Goal) | ❌ | ✅ (단일 skill) | ✅ (execute 의무 로드, critique 검출, plan 템플릿 강제 — v5.2) |
+| Plugin 패키징 (`.claude-plugin/plugin.json`) | ❌ | ✅ (skills) | ✅ (commands+hooks+rules — v5.2) |
+| Windows 네이티브 지원 | ❌ | ❌ | ✅ (PowerShell 훅 + junction/hardlink — v5.2) |
 
 ---
 
 ## 11. 빠른 시작
 
-1. 레포 clone 및 심볼릭 링크 설정 (위 §9)
-2. 새 프로젝트 시크릿: `cp .env.example /Users/pole/scripts/harness/harness/_harness/projects/{프로젝트명}/.env` → 값 채움 (Git 제외 강제, 글로벌 보관)
+1. 레포 clone 및 OS별 링크 설정 (위 §9 — macOS는 `ln -s`, Windows는 `mklink /J`·`/H`).
+2. 새 프로젝트 시크릿: `_harness/projects/{프로젝트명}/.env` 에 값 채움 (Git 제외 강제, 글로벌 보관).
+   - macOS: `/Users/pole/scripts/harness/harness/_harness/projects/...`
+   - Windows: `C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/_harness/projects/...`
 3. 새 프로젝트 작업 디렉토리로 이동(`cd <프로젝트 루트>`) — 슬래시 커맨드 실행 시 그 자리에 `./_harness/` 가 자동 생성된다.
 4. 워크플로 시작: `/se:plan <목표>` → `/se:critique` → `/se:confirm` → `/se:execute 1`
+   - `/se:plan` 출력에 **Assumptions 표** + 단계별 **성공 기준 (Verification)** 항목이 포함되는지 확인 (v5.2 강제).
+   - `/se:execute` 진입 시 `Assumptions` 의 "확인 필요" 항목이 모두 확정되었는지 자동 검증.
 5. 진행 상태 확인: `./_harness/security_engineer/plan.md` 로드맵 표 (해당 프로젝트의 로컬 산출물)
 6. 세션 재개: `./_harness/history.md` 가장 위 항목부터 읽기 (해당 프로젝트의 로컬 산출물)
 7. 여러 프로젝트의 산출물을 한 번에 보고 싶으면 `/se:doc --central` 또는 `/teacher:doc` 중앙화 옵션으로 글로벌 `_harness/{persona}/docs/central/` 에 수합한다.
@@ -318,5 +387,18 @@ ls -la ~/.claude/CLAUDE.md ~/.claude/hooks/ ~/.claude/commands/
 - 프로젝트별 진행 이력: 각 프로젝트의 `./_harness/history.md`
 - 글로벌 정의 — 권한·정책: [_harness/permissions.md](_harness/permissions.md)
 - 글로벌 정의 — 실행 라이브러리: [_harness/security_engineer/execute_library.md](_harness/security_engineer/execute_library.md)
+- 글로벌 정의 — Karpathy 4원칙: [rules/common/karpathy_guidelines.md](rules/common/karpathy_guidelines.md)
+- 플러그인 메타데이터: [.claude-plugin/plugin.json](.claude-plugin/plugin.json)
 - 프로젝트별 현 계획: 각 프로젝트의 `./_harness/security_engineer/plan.md`
 - 프로젝트별 리스크: 각 프로젝트의 `./_harness/security_engineer/plan_risks.md`
+
+---
+
+## 변경 이력 (주요)
+
+| 버전 | 날짜 | 주요 변경 |
+|---|---|---|
+| v5.2 | 2026-04-29 | Karpathy 4원칙 통합 (rules/common/karpathy_guidelines.md), `/se:plan` 템플릿에 Assumptions·Verification 강제, `/se:critique` Karpathy 위반 검출, `/se:execute` Surgical 게이트, `.claude-plugin/plugin.json` 패키징 |
+| v5.2 | 2026-04-27 | Windows 환경 지원 (PowerShell 훅 `model_switch.ps1`, junction/hardlink 셋업, 모든 절대경로 Windows 변환) |
+| v5.1 | 2026-04-26 | 정의(글로벌) ↔ 산출물(프로젝트 로컬) 분리 규칙 |
+| v5.0 | — | 토큰 비용 가드 (슬라이싱·diff·skip) 도입 |
