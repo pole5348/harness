@@ -21,7 +21,7 @@
 
 ### Karpathy 4원칙 의무 적용 (rules/common/karpathy_guidelines.md)
 
-> **의무 로드 파일**: `C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/rules/common/karpathy_guidelines.md`
+> **의무 로드 파일**: `~/.claude/rules/common/karpathy_guidelines.md`
 > 본 파일을 단계 진입 시 함께 로드하여 4원칙을 따른다. 충돌 시 우선순위는 가이드라인 말미 참조.
 
 - **(1원칙) Think Before Coding**: `plan/{N}.md`의 `Assumptions` 표에 "확인 필요" 항목이 남아있으면 코드 작성 전에 사용자에게 확정 요청. 모호한 지시가 있으면 추측하지 말고 후보를 제시.
@@ -34,8 +34,8 @@
 - [ ] `./_harness/security_engineer/plan.md` 존재 확인
 - [ ] `./_harness/security_engineer/plan/{N}.md` 의 `Assumptions` 표 — "확인 필요" 항목 모두 확정 상태인지 확인 (Karpathy 1원칙)
 - [ ] `./_harness/security_engineer/plan/{N}.md` 의 `성공 기준 (Verification)` 섹션 존재 여부 확인 (Karpathy 4원칙) — 없으면 사용자에게 보강 요청
-- [ ] `C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/rules/common/karpathy_guidelines.md` 로드
-- [ ] `C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/_harness/security_engineer/execute_library.md` (글로벌 정의) 확인 (필요한 MCP/Skills 준비 여부)
+- [ ] `~/.claude/rules/common/karpathy_guidelines.md` 로드
+- [ ] `~/.claude/_harness/security_engineer/execute_library.md` (글로벌 정의) 확인 (필요한 MCP/Skills 준비 여부)
 - [ ] 현재 환경(OS, 런타임 버전 등) 확인
 
 ### SBOM 리포트 작성 규칙
@@ -70,7 +70,7 @@
 
 ### 사용하는 MCP / Skills
 
-상세 목록: `C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/_harness/security_engineer/execute_library.md` (글로벌 정의) 참고
+상세 목록: `~/.claude/_harness/security_engineer/execute_library.md` (글로벌 정의) 참고
 
 ---
 

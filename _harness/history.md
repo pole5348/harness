@@ -35,6 +35,90 @@
 
 ---
 
+## 2026-04-30 — v5.4 jha0313 영감 흡수 + `/se:` → `/harness:` 리네이밍
+
+- **목표**: jha0313/harness_framework 비교 결과 우선순위 #1~#4 적용 + 슬래시 커맨드 네임스페이스 변경
+- **네임스페이스 변경**:
+  - `commands/se/` → `commands/harness/` (`git mv` 로 히스토리 보존)
+  - 모든 `/se:plan`, `/se:critique`, ... → `/harness:plan`, `/harness:critique`, ...
+  - `/teacher:*` 는 변경 없음 (학부생 페르소나는 별도 네임스페이스)
+  - 영향 파일 (8개): `commands/harness/*.md` (6), `hooks/model_switch.{py,ps1}`, `CLAUDE.md`, `README.md`, `rules/common/karpathy_guidelines.md`, `.claude-plugin/plugin.json`, `scripts/setup.ps1`
+- **신규 슬래시 커맨드**:
+  - `/harness:auto [N|N..M|--all]` — Karpathy Verification 통과까지 자율 루프 실행. 3회 실패 시 `blocked` 표시 후 STOP. (jha0313 의 `execute.py` 영감, 단 외부 Python 미사용 — 슬래시 커맨드로 구현)
+- **신규 훅 2종**:
+  - `hooks/bash_safety.{py,ps1}` (PreToolUse, matcher=Bash) — `hooks/lib/bash_patterns.json` 의 L4 패턴 매칭 시 `decision: block`. 차단 패턴 14종: `rm -rf /`, `git push --force`, `git reset --hard`, `git clean -fdx`, `DROP TABLE`, `TRUNCATE`, WHERE 없는 `DELETE`, fork bomb, `dd /dev/...`, `mkfs`, `format`, `shutdown`, `chmod -R 777 /`, `sudo rm -rf`. **plan_risks.md 의 "L4 의미 토큰+5초 카운트다운" 정책 대비 강성 변경** — 사용자 결정 영역, 필요 시 패턴 완화 가능.
+  - `hooks/stop_validate.{py,ps1}` (Stop) — 프로젝트 마커 자동 감지 (package.json/pyproject.toml/Cargo.toml/go.mod) 후 적절한 검증 실행 (`npm lint+build+test` 등). git 변경 없으면 skip. 정보 제공만 — 차단하지 않음. stderr 출력으로 Claude UI 표시.
+- **신규 표준 docs 템플릿 4종** (jha0313 의 `docs/{ADR,PRD,ARCHITECTURE,UI_GUIDE}` 영감, 보안 엔지니어 페르소나 특화):
+  - `_harness/security_engineer/docs/templates/ADR.md` — 의사결정 기록 (옵션 비교 + 보안 고려사항 + Verification)
+  - `_harness/security_engineer/docs/templates/PRD.md` — 요구사항 정의 (Assumptions·보안 요구사항·Success Criteria 포함)
+  - `_harness/security_engineer/docs/templates/ARCHITECTURE.md` — 컴포넌트·데이터 흐름·STRIDE 위협 모델·시크릿 관리·SLO
+  - `_harness/security_engineer/docs/templates/UI_GUIDE.md` — CLI/UI 출력 표준 + 시크릿 마스킹 + 에러 메시지 분리
+  - `commands/harness/doc.md` 갱신 — `/harness:doc ADR <제목>` 등으로 템플릿 직접 활용 가능
+- **setup 스크립트 보강**:
+  - `setup.ps1` — bash_safety.ps1, stop_validate.ps1 hardlink 추가. `~/.claude/settings.json` 에 PreToolUse(Bash matcher), Stop 훅 자동 등록.
+    - **이슈**: PowerShell 5.1 `ConvertTo-Json` 단일 원소 배열 평탄화 버그 → ArrayList workaround 도 실패. **정적 템플릿 방식**으로 우회 (idempotent 검사 후 필요 시 전체 rewrite, 기존 `settings.json` 은 `.bak` 백업).
+  - `setup.sh` — bash_safety.py, stop_validate.py symlink 추가. Python 으로 `settings.json` 다중 훅 idempotent 등록 (이슈 없음).
+- **`.claude-plugin/plugin.json`** v5.4.0 갱신 — 신규 훅 3종, 표준 doc 템플릿, OS-비의존 명시.
+- **모델 매핑 갱신**: `/harness:auto` → `claude-sonnet-4-6` 추가 (model_switch.py/.ps1).
+- **검증** (Windows 본 머신):
+  - bash_safety.ps1 단위 테스트 3/3 통과 (`rm -rf /`, `git push --force`, `git status`)
+  - settings.json JSON 유효성 통과 — UserPromptSubmit/PreToolUse/Stop 모두 배열 보존
+  - `~/.claude/{commands/harness, _harness, rules, hooks}` 모두 link OK
+- **변경 파일 (총 21개)**:
+  - 신규 (10): `commands/harness/auto.md`, `hooks/{bash_safety, stop_validate}.{py,ps1}` (4), `hooks/lib/bash_patterns.json`, `_harness/security_engineer/docs/templates/{ADR,PRD,ARCHITECTURE,UI_GUIDE}.md` (4)
+  - 리네임 (6): `commands/se/*.md` → `commands/harness/*.md`
+  - 수정 (10): `commands/harness/{plan,critique,confirm,execute,review,doc}.md`, `hooks/model_switch.{py,ps1}`, `CLAUDE.md`, `README.md`, `rules/common/karpathy_guidelines.md`, `.claude-plugin/plugin.json`, `scripts/setup.{ps1,sh}`, `_harness/history.md`
+- **잔여 작업**:
+  - `/harness:auto` 는 Claude 가 자체 실행하는 루프 — Python `execute.py` 와 달리 외부 의존성 없음. 단, 한 세션 내에서 처리되므로 매우 긴 plan(10단계+) 은 컨텍스트 폭주 가능. 추후 `auto_state.json` 활용한 세션 재진입 패턴 보강 검토.
+  - `bash_safety` L4 차단 정책 — 기존 `plan_risks.md` 의 "5초 카운트다운" 결정과 상충. 운영 1주 후 사용자 피드백 반영하여 차단 vs 카운트다운 재결정.
+
+---
+
+## 2026-04-30 — v5.3 OS-비의존 일원화 (main ↔ windows 브랜치 통합 가능)
+
+- **목표**: macOS / Linux / Windows 어느 환경에서도 단일 브랜치로 동일하게 동작하는 하네스
+- **핵심 변경**: 모든 OS-specific 절대경로 제거, `~/.claude/...` 통일. setup 스크립트가 OS별 링크(symlink/junction/hardlink) 자동 구성.
+- **신규 파일**:
+  - `scripts/setup.ps1` — Windows 설치 스크립트 (junction + hardlink + settings.json 훅 등록, idempotent)
+  - `scripts/setup.sh` — macOS/Linux 설치 스크립트 (symlink + settings.json 훅 등록, idempotent)
+- **경로 일괄 교체** (16개 파일):
+  - `CLAUDE.md`
+  - `commands/se/{plan, critique, execute, review, doc}.md`
+  - `commands/teacher/{ask, doc}.md`
+  - `_harness/permissions.md`
+  - `_harness/security_engineer/{03_execute, 05_document, review_report}.md`
+  - `_harness/student/02_document.md`
+  - 모든 OS-specific 경로(`C:/Users/...`, `/Users/pole/...`) → `~/.claude/_harness/...`, `~/.claude/rules/...` 로 통일
+- **`~/.claude/` 구조 (양 OS 동일)**:
+  ```
+  ~/.claude/
+  ├── CLAUDE.md          # hardlink/symlink → harness CLAUDE.md
+  ├── commands/se        # junction/symlink → harness commands/se
+  ├── commands/teacher   # junction/symlink → harness commands/teacher
+  ├── _harness           # junction/symlink → harness _harness (정의 전체)
+  ├── rules              # junction/symlink → harness rules
+  └── hooks/
+      └── model_switch.{py,ps1}   # OS별 hardlink/symlink
+  ```
+- **검증** (Windows 본 머신):
+  - `setup.ps1 -HarnessRoot <path>` 실행 후 5/5 검증 통과
+  - `~/.claude/_harness/security_engineer/01_plan.md` 접근 가능
+  - `~/.claude/rules/common/karpathy_guidelines.md` 접근 가능
+- **`.gitignore` 보강**: `.claude/settings.local.json`, `.claude/projects/`, `.claude/sessions/`, `.obsidian/workspace.json` 등 환경 의존 파일 제외
+- **CLAUDE.md 핵심 섹션 추가**: "환경 독립적 경로 규약 (v5.3)" — Claude 가 `~` 를 OS별로 자동 해석함을 명시
+- **branch 통합 권장**:
+  - 본 변경사항 main 에 commit 후 windows 브랜치 삭제 가능
+  - `git branch -d windows && git push origin --delete windows`
+- **변경 파일 (총 19개)**:
+  - 신규 (2): `scripts/setup.ps1`, `scripts/setup.sh`
+  - 경로 통일 (12): CLAUDE.md, commands/se/*.md (5), commands/teacher/*.md (2), _harness/permissions.md, _harness/security_engineer/{03_execute,05_document,review_report}.md (3), _harness/student/02_document.md
+  - README v5.3 갱신 (1): README.md
+  - .gitignore 보강 (1)
+  - history.md 본 항목 (1)
+  - settings 추가 항목 (2): `.claude/settings.local.json` (untracked, gitignore 됨)
+
+---
+
 ## 2026-04-29 — README.md v5.2 반영
 
 - **작업**: README 전체를 v5.2 변경(Windows 지원 + Karpathy 4원칙 + plugin.json) 에 맞춰 업데이트

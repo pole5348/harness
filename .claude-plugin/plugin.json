@@ -1,7 +1,7 @@
 {
   "name": "harness-security-engineer",
-  "description": "보안 엔지니어 페르소나 + 학부생 Q&A 페르소나로 구성된 다단계 워크플로 하네스. plan→critique→confirm→execute→review→doc 파이프라인, 자동 모델 전환 훅, 토큰 가드 (슬라이싱·diff·skip) 포함. Karpathy 4원칙(Think Before / Simplicity / Surgical / Goal-Driven) 의무 적용.",
-  "version": "5.2.0",
+  "description": "보안 엔지니어 페르소나 + 학부생 Q&A 페르소나로 구성된 다단계 워크플로 하네스. plan→critique→confirm→execute→review→doc→auto 파이프라인, 자동 모델 전환 훅, 토큰 가드 (슬라이싱·diff·skip), Bash 안전 검사, Stop 자동 검증, 표준 docs 템플릿 (ADR/PRD/ARCH/UI). Karpathy 4원칙(Think Before / Simplicity / Surgical / Goal-Driven) 의무 적용.",
+  "version": "5.4.0",
   "author": {
     "name": "platform9dev"
   },
@@ -16,11 +16,16 @@
     "karpathy-guidelines"
   ],
   "commands": [
-    "./commands/se",
+    "./commands/harness",
     "./commands/teacher"
   ],
   "hooks": [
-    "./hooks/model_switch.ps1"
+    "./hooks/model_switch.py",
+    "./hooks/model_switch.ps1",
+    "./hooks/bash_safety.py",
+    "./hooks/bash_safety.ps1",
+    "./hooks/stop_validate.py",
+    "./hooks/stop_validate.ps1"
   ],
   "rules": [
     "./rules/common/karpathy_guidelines.md"
@@ -28,11 +33,12 @@
   "definitions": {
     "personas": "./_harness/security_engineer/,./_harness/student/",
     "permissions": "./_harness/permissions.md",
-    "execute_library": "./_harness/security_engineer/execute_library.md"
+    "execute_library": "./_harness/security_engineer/execute_library.md",
+    "doc_templates": "./_harness/security_engineer/docs/templates/"
   },
   "platform": {
-    "primary": "windows",
-    "shell": "powershell",
-    "notes": "macOS 호환을 위해서는 hooks/model_switch.py (Python 3) 를 hooks/model_switch.ps1 대신 사용. settings.json 의 command 도 그에 맞춰 변경 필요."
+    "primary": "cross-platform",
+    "shell": "bash (macOS/Linux) | powershell (Windows)",
+    "setup": "scripts/setup.sh (macOS/Linux) | scripts/setup.ps1 (Windows)"
   }
 }

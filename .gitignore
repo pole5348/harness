@@ -4,6 +4,14 @@
 .env.*.local
 _harness/projects/*/.env
 
+# ── 환경 의존 IDE 설정 (사용자별로 다름) ─────────────────────────────────────
+.claude/settings.local.json
+.claude/projects/
+.claude/sessions/
+
+# ── Obsidian 워크스페이스 (사용자별로 다름) ──────────────────────────────────
+.obsidian/workspace.json
+
 # ── Continuous Learning 격리 ─────────────────────────────────────────────────
 _harness/continuous_learning/quarantine/
 

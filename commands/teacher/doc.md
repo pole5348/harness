@@ -3,7 +3,7 @@ description: "학부생 페르소나: 학습 내용 문서화. 사용법: /teach
 model: claude-sonnet-4-6
 ---
 
-C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/_harness/student/02_document.md (글로벌 정의 파일) 을 읽고 학습 문서를 작성한다.
+~/.claude/_harness/student/02_document.md (글로벌 정의 파일) 을 읽고 학습 문서를 작성한다.
 
 정리 대상: $ARGUMENTS
 인자가 없으면 현재 대화에서 다룬 내용을 자동으로 정리한다.

@@ -12,7 +12,12 @@
       "Bash(git -C \"c:/Users/tngus/OneDrive/바탕 화면/scripts/harness\" show --stat 6ec237e)",
       "Bash(git -C \"c:/Users/tngus/OneDrive/바탕 화면/scripts/harness\" show 6ec237e -- .claude/settings.local.json)",
       "Bash(git checkout *)",
-      "Bash(git ls-tree *)"
+      "Bash(git ls-tree *)",
+      "PowerShell(& \"C:\\\\Users\\\\tngus\\\\OneDrive\\\\���� ȭ��\\\\scripts\\\\harness\\\\scripts\\\\setup.ps1\")",
+      "PowerShell(powershell -ExecutionPolicy Bypass -File \"C:\\\\Users\\\\tngus\\\\OneDrive\\\\바탕 화면\\\\scripts\\\\harness\\\\scripts\\\\setup.ps1\")",
+      "PowerShell(powershell -ExecutionPolicy Bypass -File \"C:\\\\Users\\\\tngus\\\\OneDrive\\\\바탕 화면\\\\scripts\\\\harness\\\\scripts\\\\setup.ps1\" -HarnessRoot \"C:\\\\Users\\\\tngus\\\\OneDrive\\\\바탕 화면\\\\scripts\\\\harness\")",
+      "PowerShell($test = '{\"prompt\": \"/se:plan v5.3 final test\"}'; $result = $test | powershell -NonInteractive -ExecutionPolicy Bypass -File \"$env:USERPROFILE\\\\.claude\\\\hooks\\\\model_switch.ps1\"; Write-Host \"Hook Output: $result\"; Write-Host \"\"; Write-Host \"=== settings.json ===\"; Get-Content \"$env:USERPROFILE\\\\.claude\\\\settings.json\"; Write-Host \"\"; Write-Host \"=== ~/.claude/_harness/security_engineer 접근 ===\"; Get-ChildItem \"$env:USERPROFILE\\\\.claude\\\\_harness\\\\security_engineer\" | Select-Object -First 5 Name; Write-Host \"\"; Write-Host \"=== ~/.claude/rules/common 접근 ===\"; Get-ChildItem \"$env:USERPROFILE\\\\.claude\\\\rules\\\\common\" | Select-Object Name)",
+      "Bash(git mv *)"
     ]
   }
 }

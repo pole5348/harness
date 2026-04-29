@@ -3,7 +3,7 @@ description: "학부생 페르소나: 교수님께 질문. 사용법: /teacher:a
 model: claude-sonnet-4-6
 ---
 
-C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/_harness/student/01_ask.md 파일을 읽고 교수님 역할로 답변한다.
+~/.claude/_harness/student/01_ask.md 파일을 읽고 교수님 역할로 답변한다.
 
 질문: $ARGUMENTS
 인자가 없으면 사용자에게 질문 내용을 요청한다.
