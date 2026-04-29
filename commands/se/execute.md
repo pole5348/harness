@@ -3,9 +3,9 @@ description: "보안엔지니어 3단계: 계획 기반 실행. 사용법: /se:e
 model: claude-sonnet-4-6
 ---
 
-/Users/pole/scripts/harness/harness/_harness/security_engineer/03_execute.md (글로벌 정의 파일) 을 읽고 해당 에이전트 역할과 규칙을 따른다.
+C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/_harness/security_engineer/03_execute.md (글로벌 정의 파일) 을 읽고 해당 에이전트 역할과 규칙을 따른다.
 
-> **경로 규약**: 정의/라이브러리 파일은 글로벌 절대경로(`/Users/pole/scripts/harness/harness/_harness/...`), 산출물(`plan.md`, `plan/`, `history.md`, `sbom_report.md` 등)은 **CWD 기준 `./_harness/...`**.
+> **경로 규약**: 정의/라이브러리 파일은 글로벌 절대경로(`C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/_harness/...`), 산출물(`plan.md`, `plan/`, `history.md`, `sbom_report.md` 등)은 **CWD 기준 `./_harness/...`**.
 
 ## 의무 로드 (토큰 가드)
 
@@ -17,10 +17,14 @@ model: claude-sonnet-4-6
 
 **전체 plan.md 본문 또는 다른 단계 plan/*.md를 임의로 로드하지 않는다** (토큰 가드).
 
+## 의무 로드 추가 (Karpathy 4원칙)
+
+- `C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/rules/common/karpathy_guidelines.md` — **모든 실행에서 의무 로드** (코딩 행동 지침 4원칙)
+
 ## 조건부 로드
 
-- `/Users/pole/scripts/harness/harness/_harness/security_engineer/execute_library.md` (글로벌 정의) — **외부 라이브러리·MCP 사용이 필요할 때만** 로드
-- `/Users/pole/scripts/harness/harness/_harness/permissions.md` (글로벌 정의) — **권한 변경이 필요할 때만** 로드
+- `C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/_harness/security_engineer/execute_library.md` (글로벌 정의) — **외부 라이브러리·MCP 사용이 필요할 때만** 로드
+- `C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/_harness/permissions.md` (글로벌 정의) — **권한 변경이 필요할 때만** 로드
 - `rules/common/security.md` — 7단계 완료 후 모든 실행에서 로드 (그 이전 단계에서는 미로드)
 
 ## 실행

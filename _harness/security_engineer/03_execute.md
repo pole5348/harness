@@ -19,10 +19,23 @@
 - 보안 취약점(OWASP Top 10 등)을 유발하는 코드를 작성하지 않는다.
 - 모든 출력과 기록은 **한국어**로 작성한다.
 
+### Karpathy 4원칙 의무 적용 (rules/common/karpathy_guidelines.md)
+
+> **의무 로드 파일**: `C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/rules/common/karpathy_guidelines.md`
+> 본 파일을 단계 진입 시 함께 로드하여 4원칙을 따른다. 충돌 시 우선순위는 가이드라인 말미 참조.
+
+- **(1원칙) Think Before Coding**: `plan/{N}.md`의 `Assumptions` 표에 "확인 필요" 항목이 남아있으면 코드 작성 전에 사용자에게 확정 요청. 모호한 지시가 있으면 추측하지 말고 후보를 제시.
+- **(2원칙) Simplicity First**: `plan/{N}.md`에 명시되지 않은 추상화/설정 옵션/유연성 추가 금지. "장래 확장성을 위해…" 형태의 코드 작성 금지.
+- **(3원칙) Surgical Changes**: 변경 범위는 단계가 명시한 파일·함수로 한정. 인접 코드의 포맷/스타일/네이밍 "개선" 금지. 본인 변경으로 미사용된 import/변수만 제거. 기존 데드코드는 `history.md`에 "차후 정리 후보"로 보고만 하고 삭제 금지.
+- **(4원칙) Goal-Driven Execution**: `plan/{N}.md`의 `성공 기준 (Verification)` 항목을 실제로 실행해 통과 확인. 실패 시 통과까지 자율 루프 가능 (단, 수정 범위는 여전히 surgical). Verification 섹션이 누락되어 있으면 사용자에게 "검증 기준 부재" 경고 후 실행 보류.
+
 ### 실행 전 체크리스트
 
 - [ ] `./_harness/security_engineer/plan.md` 존재 확인
-- [ ] `/Users/pole/scripts/harness/harness/_harness/security_engineer/execute_library.md` (글로벌 정의) 확인 (필요한 MCP/Skills 준비 여부)
+- [ ] `./_harness/security_engineer/plan/{N}.md` 의 `Assumptions` 표 — "확인 필요" 항목 모두 확정 상태인지 확인 (Karpathy 1원칙)
+- [ ] `./_harness/security_engineer/plan/{N}.md` 의 `성공 기준 (Verification)` 섹션 존재 여부 확인 (Karpathy 4원칙) — 없으면 사용자에게 보강 요청
+- [ ] `C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/rules/common/karpathy_guidelines.md` 로드
+- [ ] `C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/_harness/security_engineer/execute_library.md` (글로벌 정의) 확인 (필요한 MCP/Skills 준비 여부)
 - [ ] 현재 환경(OS, 런타임 버전 등) 확인
 
 ### SBOM 리포트 작성 규칙
@@ -57,7 +70,7 @@
 
 ### 사용하는 MCP / Skills
 
-상세 목록: `/Users/pole/scripts/harness/harness/_harness/security_engineer/execute_library.md` (글로벌 정의) 참고
+상세 목록: `C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/_harness/security_engineer/execute_library.md` (글로벌 정의) 참고
 
 ---
 

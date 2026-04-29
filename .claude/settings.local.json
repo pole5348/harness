@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh repo *)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(grep -n -E \"^\\(#{1,3}|>\\) \" \"c:/Users/tngus/OneDrive/바탕 화면/scripts/harness/README.md\")",
+      "Bash(git -C \"c:/Users/tngus/OneDrive/바탕 화면/scripts/harness\" branch --show-current)",
+      "Bash(git -C \"c:/Users/tngus/OneDrive/바탕 화면/scripts/harness\" status --short)",
+      "Bash(git -C \"c:/Users/tngus/OneDrive/바탕 화면/scripts/harness\" log --oneline -5 windows)",
+      "Bash(git -C \"c:/Users/tngus/OneDrive/바탕 화면/scripts/harness\" log --oneline -5 main)",
+      "Bash(git -C \"c:/Users/tngus/OneDrive/바탕 화면/scripts/harness\" show --stat 6ec237e)",
+      "Bash(git -C \"c:/Users/tngus/OneDrive/바탕 화면/scripts/harness\" show 6ec237e -- .claude/settings.local.json)",
+      "Bash(git checkout *)",
+      "Bash(git ls-tree *)"
+    ]
+  }
+}

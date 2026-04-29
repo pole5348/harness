@@ -15,10 +15,10 @@ Claude Code 하네스 엔지니어링 레포의 환경 기반을 정비하는 1�
 ### 초기 설정 방법
 ```bash
 # 심볼릭 링크 (이미 완료)
-ln -s /Users/pole/scripts/harness/harness/CLAUDE.md ~/.claude/CLAUDE.md
-ln -s /Users/pole/scripts/harness/harness/hooks/model_switch.py ~/.claude/hooks/model_switch.py
-ln -s /Users/pole/scripts/harness/harness/commands/se ~/.claude/commands/se
-ln -s /Users/pole/scripts/harness/harness/commands/teacher ~/.claude/commands/teacher
+ln -s C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/CLAUDE.md ~/.claude/CLAUDE.md
+ln -s C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/hooks/model_switch.py ~/.claude/hooks/model_switch.py
+ln -s C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/commands/se ~/.claude/commands/se
+ln -s C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/commands/teacher ~/.claude/commands/teacher
 
 # 프로젝트별 시크릿
 cp .env.example _harness/projects/{프로젝트명}/.env

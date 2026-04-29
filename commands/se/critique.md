@@ -3,7 +3,7 @@ description: "보안엔지니어 2단계: 계획 비판. 사용법: /se:critique
 model: claude-opus-4-7
 ---
 
-/Users/pole/scripts/harness/harness/_harness/security_engineer/02_critique.md 파일을 읽고 해당 에이전트 역할과 출력 형식을 따른다.
+C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/_harness/security_engineer/02_critique.md 파일을 읽고 해당 에이전트 역할과 출력 형식을 따른다.
 
 ## 의무 로드 (토큰 가드)
 

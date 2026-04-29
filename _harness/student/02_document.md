@@ -69,7 +69,7 @@
 ## 파일 저장 위치
 
 - **기본 (프로젝트 로컬)**: `./_harness/student/docs/[YYYY-MM-DD]_[주제].md` (현재 작업 디렉토리 기준)
-- **중앙화 옵션** (여러 프로젝트의 학습 노트를 한 곳에 모을 때): `/Users/pole/scripts/harness/harness/_harness/student/docs/central/[YYYY-MM-DD]_[프로젝트명]_[주제].md`
+- **중앙화 옵션** (여러 프로젝트의 학습 노트를 한 곳에 모을 때): `C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/_harness/student/docs/central/[YYYY-MM-DD]_[프로젝트명]_[주제].md`
 
 ---
 

@@ -3,7 +3,7 @@
 > 각 에이전트가 사용하는 MCP, Skills, 권한을 한 곳에서 관리한다.
 > 원칙: **필요한 만큼만** 권한을 부여한다. 단계가 끝나면 해당 권한은 해제한다.
 >
-> **경로 규약**: 이 문서는 글로벌 정의 파일(`/Users/pole/scripts/harness/harness/_harness/permissions.md`)이다. 표 안의 산출물 경로는 모두 **CWD 기준 `./_harness/...`** (프로젝트 로컬) 이다.
+> **경로 규약**: 이 문서는 글로벌 정의 파일(`C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/_harness/permissions.md`)이다. 표 안의 산출물 경로는 모두 **CWD 기준 `./_harness/...`** (프로젝트 로컬) 이다.
 
 ---
 
@@ -63,7 +63,7 @@
 | MCP | Confluence MCP (연결 시), 디자인 툴 MCP (연결 시) |
 | Skills | 없음 |
 | 금지 | 코드 수정, Bash 실행 |
-| 산출물 | 정형화된 문서 파일 → 기본 `./_harness/security_engineer/docs/` (프로젝트 로컬), 중앙화 시 `/Users/pole/scripts/harness/harness/_harness/security_engineer/docs/central/` |
+| 산출물 | 정형화된 문서 파일 → 기본 `./_harness/security_engineer/docs/` (프로젝트 로컬), 중앙화 시 `C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/_harness/security_engineer/docs/central/` |
 
 ---
 
@@ -89,7 +89,7 @@
 | MCP | Confluence MCP, 티스토리 MCP (연결 시) |
 | Skills | 없음 |
 | 금지 | 코드 실행(Bash) |
-| 산출물 | `./_harness/student/docs/` (프로젝트 로컬). 중앙화 시 `/Users/pole/scripts/harness/harness/_harness/student/docs/central/` |
+| 산출물 | `./_harness/student/docs/` (프로젝트 로컬). 중앙화 시 `C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/_harness/student/docs/central/` |
 
 ---
 

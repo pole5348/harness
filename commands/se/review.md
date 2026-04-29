@@ -3,7 +3,7 @@ description: "보안엔지니어 4단계: 종합 검토 및 리포트. 사용법
 model: claude-sonnet-4-6
 ---
 
-/Users/pole/scripts/harness/harness/_harness/security_engineer/04_review.md (글로벌 정의 파일) 을 읽고 해당 에이전트 역할과 출력 형식을 따른다.
+C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/_harness/security_engineer/04_review.md (글로벌 정의 파일) 을 읽고 해당 에이전트 역할과 출력 형식을 따른다.
 
 추가 검토 범위: $ARGUMENTS
 

@@ -42,7 +42,7 @@
 ### 출력 파일 위치
 
 - **기본 (프로젝트 로컬)**: `./_harness/security_engineer/docs/` 하위에 저장 (현재 작업 디렉토리 기준)
-- **중앙화 옵션** (여러 프로젝트의 산출물을 한 곳에 모을 때): `/Users/pole/scripts/harness/harness/_harness/security_engineer/docs/central/` 에 `[YYYY-MM-DD]_[프로젝트명]_[문서유형].md` 형식으로 저장
+- **중앙화 옵션** (여러 프로젝트의 산출물을 한 곳에 모을 때): `C:/Users/tngus/OneDrive/바탕 화면/scripts/harness/_harness/security_engineer/docs/central/` 에 `[YYYY-MM-DD]_[프로젝트명]_[문서유형].md` 형식으로 저장
 
 ---
 
