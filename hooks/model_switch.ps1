@@ -2,20 +2,21 @@
 .SYNOPSIS
 UserPromptSubmit 훅 — 슬래시 커맨드에 따라 ~/.claude/settings.json 의 모델을 자동 전환한다.
 
-/harness:plan, /harness:critique                    → claude-opus-4-7
-/harness:confirm, /harness:execute, /harness:review      → claude-sonnet-4-6
-/harness:doc                                   → claude-haiku-4-5-20251001
-/harness:learn sonnet|opus                     → 인자에 따라 모델 결정
-/harness:learn rollback|audit|cleanup          → claude-sonnet-4-6
-/harness:backup, /harness:summary, /harness:note        → claude-sonnet-4-6
-/teacher:ask, /teacher:doc               → claude-sonnet-4-6
+/harness:plan, /harness:critique                              → claude-opus-4-7
+/harness:confirm, /harness:execute, /harness:review,
+/harness:auto, /harness:continue                              → claude-sonnet-4-6
+/harness:doc                                                  → claude-haiku-4-5-20251001
+/harness:learn sonnet|opus                                    → 인자에 따라 모델 결정
+/harness:learn rollback|audit|cleanup                         → claude-sonnet-4-6
+/harness:backup, /harness:summary, /harness:note              → claude-sonnet-4-6
+/teacher:ask, /teacher:doc                                    → claude-sonnet-4-6
 #>
 
 $SETTINGS_PATH = "$env:USERPROFILE\.claude\settings.json"
 
 $MODEL_MAP = @(
     @{ Pattern = "/harness:(plan|critique)";                       Model = "claude-opus-4-7" },
-    @{ Pattern = "/harness:(confirm|execute|review|auto)";         Model = "claude-sonnet-4-6" },
+    @{ Pattern = "/harness:(confirm|execute|review|auto|continue)"; Model = "claude-sonnet-4-6" },
     @{ Pattern = "/harness:doc\b";                                 Model = "claude-haiku-4-5-20251001" },
     @{ Pattern = "/harness:learn\s+sonnet\b";                      Model = "claude-sonnet-4-6" },
     @{ Pattern = "/harness:learn\s+opus\b";                        Model = "claude-opus-4-7" },

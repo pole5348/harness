@@ -2,13 +2,14 @@
 """
 UserPromptSubmit 훅 — 슬래시 커맨드에 따라 ~/.claude/settings.json 의 모델을 자동 전환한다.
 
-/harness:plan, /harness:critique                          → claude-opus-4-7
-/harness:confirm, /harness:execute, /harness:review            → claude-sonnet-4-6
-/harness:doc                                         → claude-haiku-4-5-20251001
-/harness:learn sonnet|opus                           → 인자에 따라 모델 결정
-/harness:learn rollback|audit|cleanup                → claude-sonnet-4-6
-/harness:backup, /harness:summary, /harness:note               → claude-sonnet-4-6
-/teacher:ask, /teacher:doc                      → claude-sonnet-4-6
+/harness:plan, /harness:critique                              → claude-opus-4-7
+/harness:confirm, /harness:execute, /harness:review,
+/harness:auto, /harness:continue                              → claude-sonnet-4-6
+/harness:doc                                                  → claude-haiku-4-5-20251001
+/harness:learn sonnet|opus                                    → 인자에 따라 모델 결정
+/harness:learn rollback|audit|cleanup                         → claude-sonnet-4-6
+/harness:backup, /harness:summary, /harness:note              → claude-sonnet-4-6
+/teacher:ask, /teacher:doc                                    → claude-sonnet-4-6
 
 /harness:learn 인자 누락 시 → 사용자에게 모델 명시 요청 메시지를 additionalContext로 출력
 """
@@ -21,7 +22,7 @@ SETTINGS_PATH = os.path.expanduser("~/.claude/settings.json")
 
 MODEL_MAP = [
     (r"/harness:(plan|critique)", "claude-opus-4-7"),
-    (r"/harness:(confirm|execute|review|auto)", "claude-sonnet-4-6"),
+    (r"/harness:(confirm|execute|review|auto|continue)", "claude-sonnet-4-6"),
     (r"/harness:doc\b", "claude-haiku-4-5-20251001"),
     (r"/harness:learn\s+sonnet\b", "claude-sonnet-4-6"),
     (r"/harness:learn\s+opus\b", "claude-opus-4-7"),

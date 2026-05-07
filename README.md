@@ -6,6 +6,7 @@
 >
 > **v5.4 핵심 추가**
 > - `/harness:auto` — Verification 통과까지 자율 루프 실행
+> - `/harness:continue` — 기존 이력 요약 + 다음 행동 권고 (세션 재개·인수인계용)
 > - 표준 문서 템플릿 (`ADR`, `PRD`, `ARCH`, `UI`) — `/harness:doc` 가 자동 사용
 > - `bash_safety` 훅 (PreToolUse) — L4 위험 명령 차단
 > - `stop_validate` 훅 (Stop) — 세션 종료 시 프로젝트 자동 검증 (npm/pytest/cargo/go)
@@ -72,6 +73,9 @@
 ## 2. 한눈에 보는 워크플로
 
 ```
+[/harness:continue]  Sonnet 4.6 ← (선택) 세션 재개 시 가장 먼저: 이력 요약 + 다음 행동 권고
+       │
+       ▼
 [/harness:plan]      Opus 4.7   ← 가정 표면화 + 단계별 Verification 정의
        │
        ▼
@@ -117,6 +121,7 @@ harness/
 │   ├── harness/
 │   │   ├── plan.md, critique.md, confirm.md
 │   │   ├── execute.md, auto.md             # ← /harness:auto v5.4 신규
+│   │   ├── continue.md                     # ← /harness:continue v5.4 신규
 │   │   ├── review.md, doc.md
 │   └── teacher/
 │       ├── ask.md, doc.md
@@ -511,6 +516,88 @@ for each step in [N..end]:
 
 ---
 
+### 4.10. `/harness:continue` — 이력 요약 + 재개 (v5.4 신규)
+
+| 항목 | 내용 |
+|---|---|
+| 모델 | `claude-sonnet-4-6` |
+| 의무 로드 | `./_harness/history.md` (슬라이싱) + `./_harness/security_engineer/plan.md` (헤더+로드맵) |
+| 조건부 로드 | `auto_state.json`, `review_report.md`, `sbom_report.md` (마지막 5줄), `docs/` 목록 |
+| 산출물 | (기본) `history.md` 에 점검 1줄 / `--no-record` 시 완전 읽기 전용 |
+| 인자 | 없음(=`--recent`) / `--full` / `--since YYYY-MM-DD` / `--no-record` |
+
+**핵심 동작**: 새 세션을 열었을 때 가장 먼저 호출. (1) 진척률·마지막 활동·blocked 상태를 표로 요약하고, (2) 우선순위 규칙에 따라 **다음에 실행할 정확한 슬래시 커맨드**를 1순위 + 대안 1~2개로 권고한다.
+
+**예시 1 — 가장 흔한 사용 (최근 20개 기준 자동 분석)**:
+
+```bash
+/harness:continue
+```
+
+**예시 2 — 전체 이력 점검 (인수인계용)**:
+
+```bash
+/harness:continue --full
+```
+
+**예시 3 — 특정 날짜 이후만**:
+
+```bash
+/harness:continue --since 2026-04-25
+```
+
+**예시 4 — 완전 읽기 전용 (history 에 점검 기록도 안 남김)**:
+
+```bash
+/harness:continue --no-record
+```
+
+**다음 행동 권고 우선순위 규칙**:
+
+| 순위 | 조건 | 1순위 권고 |
+|---|---|---|
+| 1 | `plan.md` 자체가 없음 | `/harness:plan <주제>` |
+| 2 | plan 은 있으나 비판 루프 중 | `/harness:critique --diff` 또는 `/harness:confirm` |
+| 3 | `auto_state.json` 에 `blocked` 단계 존재 | `/harness:execute {N}` (수동 재시도) |
+| 4 | 미완료 단계 존재 + blocked 없음 | `/harness:execute {N}` 또는 `/harness:auto {N}..` |
+| 5 | 모든 단계 완료 + `review_report.md` 없음 | `/harness:review` |
+| 6 | review 끝 + `docs/` 비어있음 | `/harness:doc PRD/ADR/ARCH/UI` 중 컨텍스트 매칭 |
+| 7 | 모든 산출물 완료 | "새 주제는 `/harness:plan` 으로 시작하세요" |
+
+**예상 출력 구조**:
+
+```
+[/harness:continue 결과] 2026-04-30 14:32
+
+## 진행 요약
+- 프로젝트: API 게이트웨이 JWT 검증 모듈
+- 마지막 활동: 2026-04-29 18:11 — HS256 채택 결정 (ADR-2)
+- 진척률: 3/7 단계 완료 (43%)
+- 외부 의존성: pyjwt 2.8.0 (2026-04-28 추가)
+
+## 단계별 상태
+| 단계 | 이름 | 상태 | 비고 |
+|---|---|---|---|
+| 1 | 토큰 파서 | ✅ | 2026-04-27 |
+| 2 | 서명 검증 | ✅ | 2026-04-28 |
+| 3 | exp/nbf | ✅ | 2026-04-29 |
+| 4 | 키 로테이션 | ⛔ blocked | auto 3회 실패 |
+| 5 | 통합 테스트 | ⏸ pending | - |
+
+## 다음 권장 행동
+**1순위**: /harness:execute 4   ← blocked 단계 수동 재시도
+   - 마지막 에러: KeyError: 'kid' in pytest tests/test_rotation.py::test_kid_rotation
+   - 검증 명령: pytest tests/test_rotation.py -v
+
+**대안**:
+- /harness:critique 4 — 4단계 plan 자체에 문제가 있는지 재점검
+- /teacher:ask JWT 키 로테이션 베스트 프랙티스
+```
+
+> **권장 사용**: 새 Claude Code 세션을 열 때 항상 가장 먼저. 그다음 권고된 명령으로 작업 진행.
+
+---
+
 ## 5. 자동 모델 전환 (model_switch)
 
 `UserPromptSubmit` 훅이 매 프롬프트마다 매칭 패턴을 검사하여 `~/.claude/settings.json` 의 `model` 필드를 갱신한다.
@@ -520,7 +607,7 @@ for each step in [N..end]:
 | 커맨드 패턴 | 모델 | 단가 비교 |
 |---|---|---|
 | `/harness:plan`, `/harness:critique` | `claude-opus-4-7` | Sonnet의 약 5배 |
-| `/harness:confirm`, `/harness:execute`, `/harness:review`, `/harness:auto` | `claude-sonnet-4-6` | 기준 |
+| `/harness:confirm`, `/harness:execute`, `/harness:review`, `/harness:auto`, `/harness:continue` | `claude-sonnet-4-6` | 기준 |
 | `/harness:doc` | `claude-haiku-4-5-20251001` | Sonnet의 약 1/4 |
 | `/teacher:ask`, `/teacher:doc` | `claude-sonnet-4-6` | 기준 |
 
@@ -834,6 +921,21 @@ cd ~/projects/my-api-gateway
 /harness:doc ARCH 게이트웨이 인증 흐름
 ```
 
+### 13.1.5. 세션 재개 시 (가장 흔한 진입점)
+
+```bash
+cd ~/projects/my-api-gateway
+
+# 며칠 만에 돌아와서 어디까지 했는지 모를 때 — 가장 먼저 호출
+/harness:continue
+# 출력: 진척률 + 단계별 상태 + 다음 권장 명령
+
+# 권고된 명령을 그대로 실행
+/harness:execute 4
+```
+
+> 인수인계 시에는 `/harness:continue --full` 로 전체 이력 요약을 받은 뒤 README 처럼 공유한다.
+
 ### 13.2. 자율 실행 흐름 (대규모 작업)
 
 ```bash
@@ -935,7 +1037,7 @@ cd ~/projects/api-gateway   # 어느 프로젝트든 OK
 
 | 버전 | 날짜 | 주요 변경 |
 |---|---|---|
-| **v5.4** | 2026-04-30 | `/harness:auto` 자율 실행 루프, 표준 문서 템플릿 (ADR/PRD/ARCH/UI), `bash_safety` 훅, `stop_validate` 훅, 모든 훅 양 OS 동등 구현 |
+| **v5.4** | 2026-04-30 | `/harness:auto` 자율 실행 루프, `/harness:continue` 이력 요약 + 재개, 표준 문서 템플릿 (ADR/PRD/ARCH/UI), `bash_safety` 훅, `stop_validate` 훅, 모든 훅 양 OS 동등 구현 |
 | v5.3 | 2026-04-30 | OS-비의존 일원화 — 모든 절대경로 `~/.claude/...` 로 통일, `setup.{sh,ps1}` 단일 명령 |
 | v5.2 | 2026-04-29 | Karpathy 4원칙 통합 (rules/common/karpathy_guidelines.md), plan 템플릿 Assumptions·Verification 강제, critique Karpathy 위반 검출, `.claude-plugin/plugin.json` 패키징 |
 | v5.2 | 2026-04-27 | Windows 환경 지원 (PowerShell 훅, junction/hardlink 셋업) |
